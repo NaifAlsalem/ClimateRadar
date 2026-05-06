@@ -1,0 +1,26 @@
+{
+  "_comment": "Use this template to add new signals to index.html. Replace daysAgo(N) with the appropriate offset from today.",
+  "signal_template": {
+    "id": 0,
+    "title": "Signal Title — Short and Descriptive",
+    "source": "Institution Name",
+    "risk": "High",
+    "category": "Narrative",
+    "date": "daysAgo(0)",
+    "summary": "2-3 sentence strategic summary. Must include explicit reference to Saudi or Arab Group implications.",
+    "link": "https://exact-source-url.org/specific-page",
+    "linkLabel": "domain.org / Specific Page Title",
+    "linkNote": "Chapter X / Section Y — specific paragraph or figure reference",
+    "kw": ["keyword1", "keyword2", "institution-name", "policy-term"]
+  },
+  "risk_levels": ["High", "Medium", "Low"],
+  "categories": ["Narrative", "Policy", "Negotiation", "Finance", "Alliance", "Strategic"],
+  "date_offsets": {
+    "today": "daysAgo(0)",
+    "yesterday": "daysAgo(1)",
+    "3_days_ago": "daysAgo(3)",
+    "1_week_ago": "daysAgo(7)",
+    "2_weeks_ago": "daysAgo(14)",
+    "1_month_ago": "daysAgo(30)"
+  }
+}

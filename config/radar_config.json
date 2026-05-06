@@ -1,0 +1,57 @@
+{
+  "platform": "Climate Radar",
+  "version": "2.1.0",
+  "classification": "CONFIDENTIAL",
+  "owner": "Naif Alsalem",
+  "organization": "Sustainability & Climate Change Agency",
+  "scan": {
+    "default_sources_count": 1284,
+    "sources_increment_per_scan_min": 12,
+    "sources_increment_per_scan_max": 50,
+    "scan_animation_step_ms": 550
+  },
+  "radar": {
+    "canvas_size_px": 340,
+    "sweep_speed": 0.018,
+    "trail_length": 10,
+    "risk_radius_map": {
+      "High": 0.35,
+      "Medium": 0.62,
+      "Low": 0.82
+    }
+  },
+  "freshness_thresholds_days": {
+    "new": 7,
+    "recent": 30,
+    "stale_threshold": 90
+  },
+  "link_verification": {
+    "timeout_ms": 7000,
+    "method": "HEAD",
+    "mode": "no-cors"
+  },
+  "pdf": {
+    "format": "a4",
+    "orientation": "portrait",
+    "footer_left": "Strategic Intelligence | Naif Alsalem",
+    "footer_right": "CONFIDENTIAL",
+    "font": "helvetica"
+  },
+  "security": {
+    "pin_algorithm": "SHA-256",
+    "session_storage_key": "cr_auth",
+    "disable_devtools_shortcuts": true,
+    "disable_right_click": true
+  },
+  "monitored_sources": [
+    { "name": "IPCC", "url": "https://www.ipcc.ch", "priority": "Critical" },
+    { "name": "UNFCCC", "url": "https://unfccc.int", "priority": "Critical" },
+    { "name": "IEA", "url": "https://www.iea.org", "priority": "High" },
+    { "name": "UNEP", "url": "https://www.unep.org", "priority": "High" },
+    { "name": "G7", "url": "https://g7.gc.ca", "priority": "High" },
+    { "name": "EU Commission", "url": "https://ec.europa.eu", "priority": "High" },
+    { "name": "African Union", "url": "https://au.int", "priority": "Medium" },
+    { "name": "Global Methane Pledge", "url": "https://www.globalmethanepledge.org", "priority": "Medium" },
+    { "name": "Vision 2030", "url": "https://www.vision2030.gov.sa", "priority": "Strategic" }
+  ]
+}

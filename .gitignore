@@ -1,0 +1,33 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# Reports (generated — do not commit)
+*.pdf
+reports/
+exports/
+
+# Secrets — NEVER commit these
+*.key
+*.pem
+secrets.json
+.env.local
+
+# Node (if ever added)
+node_modules/
+package-lock.json

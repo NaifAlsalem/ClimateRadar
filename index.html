@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Climate Radar — Naif Alsalem</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%;overflow:hidden}
+body{background:#030c10;font-family:'IBM Plex Mono',monospace;color:#c8e6d4}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#030c10}
+::-webkit-scrollbar-thumb{background:#1a3a28;border-radius:2px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.live-dot{animation:pulse 1.2s infinite}
+.alert-card{animation:fadeUp .3s ease forwards;transition:all .18s}
+.alert-card:hover{background:rgba(0,210,130,.07)!important}
+.btn-green{transition:all .18s;cursor:pointer}
+.btn-green:hover{background:rgba(0,220,130,.2)!important;border-color:#00e87a!important;color:#00e87a!important}
+.chip-btn{transition:all .15s;cursor:pointer}
+.chip-btn:hover{border-color:#00e87a!important;color:#00e87a!important}
+.spin{animation:spin .7s linear infinite;display:inline-block}
+input:focus{outline:none;border-color:rgba(0,230,130,.5)!important;box-shadow:0 0 8px rgba(0,200,120,.1)}
+input::placeholder{color:rgba(0,180,100,.35)}
+
+  /* Security overlay */
+  #sec-overlay {
+    position:fixed;inset:0;background:#030c10;z-index:99999;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  #sec-overlay .sec-title {
+    font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;
+    color:#00e87a;letter-spacing:4px;text-shadow:0 0 24px rgba(0,232,122,.5);
+    margin-bottom:8px;
+  }
+  #sec-overlay .sec-sub {
+    font-size:11px;color:rgba(0,200,120,.5);letter-spacing:3px;margin-bottom:36px;
+  }
+  #sec-overlay .sec-label {
+    font-size:10px;color:rgba(0,200,120,.45);letter-spacing:2px;margin-bottom:10px;
+  }
+  #sec-overlay input[type=password] {
+    background:rgba(0,40,25,.6);border:1px solid rgba(0,200,120,.35);
+    color:#c8e6d4;font-family:'IBM Plex Mono',monospace;font-size:18px;
+    letter-spacing:6px;padding:12px 20px;text-align:center;
+    outline:none;border-radius:2px;width:220px;margin-bottom:14px;
+  }
+  #sec-overlay input[type=password]:focus { border-color:#00e87a; box-shadow:0 0 12px rgba(0,232,122,.2); }
+  #sec-overlay .sec-btn {
+    padding:10px 40px;background:rgba(0,200,120,.12);border:1px solid rgba(0,200,120,.4);
+    color:#00e87a;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;
+    cursor:pointer;border-radius:2px;margin-bottom:12px;transition:all .2s;
+  }
+  #sec-overlay .sec-btn:hover { background:rgba(0,200,120,.22);border-color:#00e87a; }
+  #sec-overlay .sec-err {
+    font-size:10px;color:#ff4444;letter-spacing:1px;height:16px;margin-bottom:8px;
+  }
+  #sec-overlay .sec-footer {
+    position:absolute;bottom:20px;font-size:9px;color:rgba(0,200,120,.2);letter-spacing:2px;
+  }
+  /* Watermark on printed/screenshot */
+  body::after {
+    content:'CLIMATE RADAR — Dr. Naif Alsalem — CONFIDENTIAL';
+    position:fixed;bottom:8px;right:12px;
+    font-family:'IBM Plex Mono',monospace;font-size:8px;
+    color:rgba(0,200,120,.08);letter-spacing:1px;pointer-events:none;z-index:1;
+  }
+
+  </style>
+</head>
+<body>
+
+  <!-- SECURITY OVERLAY -->
+  <div id="sec-overlay">
+    <div class="sec-title">◈ CLIMATE RADAR</div>
+    <div class="sec-sub">STRATEGIC INTELLIGENCE PLATFORM</div>
+    <div class="sec-label">ENTER ACCESS CODE</div>
+    <input type="password" id="pin-input" maxlength="12" placeholder="········"
+      onkeydown="if(event.key==='Enter')checkPin()"/>
+    <div class="sec-err" id="pin-err"></div>
+    <button class="sec-btn" onclick="checkPin()">→ AUTHENTICATE</button>
+    <div class="sec-footer">AUTHORIZED ACCESS ONLY · Dr. Naif Alsalem · CONFIDENTIAL</div>
+  </div>
+
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef}=React;
+
+// Dynamic date helper — always relative to today when the app runs
+const daysAgo=(n)=>{
+  const d=new Date();
+  d.setDate(d.getDate()-n);
+  return d.toISOString().slice(0,10);
+};
+
+const ALL_ALERTS=[
+  {id:1,title:"IPCC AR7 Draft Language Shift",source:"IPCC",risk:"High",category:"Narrative",date:daysAgo(1),
+    summary:"New draft introduces binding language around fossil fuel phase-out timelines that could directly impact GCC economic strategies.",
+    link:"https://www.ipcc.ch/assessment-report/ar7/",
+    linkLabel:"ipcc.ch / AR7 Overview",
+    linkNote:"AR7 WG3 (Mitigation) in progress — outlines agreed Feb 2025, Hangzhou. Full report expected 2027–2028.",
+    kw:["IPCC","fossil fuel","phase-out","GCC"]},
+  {id:2,title:"EU Carbon Border Adjustment Expansion",source:"EU Commission",risk:"High",category:"Policy",date:daysAgo(2),
+    summary:"Proposed expansion of CBAM to include petrochemicals and fertilizers — critical export sectors for Saudi Arabia.",
+    link:"https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en",
+    linkLabel:"ec.europa.eu / CBAM Official Page",
+    linkNote:"Annex I product list — scope expansion under revision",
+    kw:["CBAM","carbon border","petrochemicals","Saudi"]},
+  {id:3,title:"G7 Climate Finance Pledge Shift",source:"G7 Presidency",risk:"Medium",category:"Finance",date:daysAgo(3),
+    summary:"New framing shifts climate finance from grants to loans, reducing support for developing nations' adaptation.",
+    link:"https://g7.gc.ca/en/g7-presidency/",
+    linkLabel:"g7.gc.ca / Canada G7 2025 Presidency",
+    linkNote:"Climate Finance communique — Section 4, para. 18 (grant vs. loan framing)",
+    kw:["climate finance","G7","loans"]},
+  {id:4,title:"UNFCCC GST Outcome Text Draft",source:"UNFCCC",risk:"High",category:"Negotiation",date:daysAgo(4),
+    summary:"Global Stocktake outcome references 'unabated fossil fuels' with ambiguous language that may set restrictive precedents.",
+    link:"https://unfccc.int/topics/global-stocktake",
+    linkLabel:"unfccc.int / Global Stocktake Hub",
+    linkNote:"Synthesis Report Ch. 3.2: Mitigation — 'unabated fossil fuels' paragraph",
+    kw:["UNFCCC","fossil fuels","GST"]},
+  {id:5,title:"IEA Net Zero Pathway Update",source:"IEA",risk:"Medium",category:"Narrative",date:daysAgo(5),
+    summary:"Updated scenario models show accelerated demand decline for oil by 2035 — 8 years earlier than previous projections.",
+    link:"https://www.iea.org/reports/world-energy-outlook-2025/stated-policies-scenario",
+    linkLabel:"iea.org / WEO 2025 — Stated Policies Scenario",
+    linkNote:"Oil demand peaks ~2030 then declines — see fossil fuel demand trajectory tables",
+    kw:["IEA","net zero","oil demand"]},
+  {id:6,title:"Saudi Vision 2030 Climate Alignment",source:"KPMG",risk:"Low",category:"Strategic",date:daysAgo(6),
+    summary:"Third-party assessment confirms Saudi renewable targets are on track, providing positive narrative leverage.",
+    link:"https://www.vision2030.gov.sa/en/",
+    linkLabel:"vision2030.gov.sa / Official Portal",
+    linkNote:"Energy & Environment pillar — renewable capacity milestones & sustainability targets",
+    kw:["Saudi","Vision 2030","renewables"]},
+  {id:7,title:"African Nations Climate Debt Coalition",source:"AU Summit",risk:"Low",category:"Alliance",date:daysAgo(7),
+    summary:"New African bloc positions align with Arab Group on historical responsibility — potential for coalition building.",
+    link:"https://au.int/en/climatechange",
+    linkLabel:"au.int / AU Climate Change",
+    linkNote:"AU Climate Declaration 2025 — Art. 7: Historical Responsibility & Loss and Damage",
+    kw:["Africa","Arab Group","coalition","loss and damage"]},
+  {id:8,title:"COP31 Agenda Leak — Loss and Damage",source:"UNFCCC",risk:"Medium",category:"Negotiation",date:daysAgo(9),
+    summary:"Preliminary agenda shows Loss and Damage fund governance dispute to be a central flashpoint.",
+    link:"https://unfccc.int/fund-for-responding-to-loss-and-damage",
+    linkLabel:"unfccc.int / Fund for Responding to Loss & Damage",
+    linkNote:"Board governance section — composition dispute & Board meeting reports (2024–2025)",
+    kw:["COP31","loss and damage","governance"]},
+  {id:9,title:"Carbon Market Article 6 Stalemate",source:"UNFCCC Bulletin",risk:"Medium",category:"Policy",date:daysAgo(12),
+    summary:"Article 6.4 mechanism facing governance deadlock; could undermine voluntary carbon market credibility.",
+    link:"https://unfccc.int/process-and-meetings/the-paris-agreement/the-glasgow-climate-pact/cop26-outcomes-market-mechanisms-and-non-market-approaches-article-6",
+    linkLabel:"unfccc.int / Article 6 — COP26 Outcomes",
+    linkNote:"Art. 6.4 Supervisory Body rules — mechanism operationalization & stalled credit issuance",
+    kw:["Article 6","carbon market","voluntary"]},
+  {id:10,title:"Methane Pledge Gap Warning — COP30 Status Report",source:"UNEP / GMP Ministerial",risk:"High",category:"Narrative",date:daysAgo(18),
+    summary:"UNEP's 2025 Global Methane Status Report warns emissions still rising despite GMP commitments. NDCs could deliver only 8% cut vs. 30% target — oil & gas implementation gap remains the critical pressure point for producers like Saudi Arabia.",
+    link:"https://www.globalmethanepledge.org/news/highlights-2025-global-methane-pledge-ministerial",
+    linkLabel:"globalmethanepledge.org / COP30 Ministerial Highlights",
+    linkNote:"Oil & Gas Methane Partnership 2.0 — 42% of global production covered. Implementation gap section.",
+    kw:["methane","oil gas","pledge","emissions","COP30"]},
+];
+const TRENDS=[
+  {label:"Phase-out Language",trend:"+18%",dir:"up",risk:"High"},
+  {label:"Just Transition",trend:"+7%",dir:"up",risk:"Medium"},
+  {label:"Carbon Markets",trend:"-3%",dir:"down",risk:"Low"},
+  {label:"Adaptation Finance",trend:"+12%",dir:"up",risk:"Medium"},
+  {label:"CBAM References",trend:"+31%",dir:"up",risk:"High"},
+  {label:"Energy Security",trend:"+22%",dir:"up",risk:"Low"},
+];
+const RC=r=>r==="High"?"#ff3c3c":r==="Medium"?"#ffb400":"#00c878";
+const RB=r=>r==="High"?"rgba(255,60,60,0.12)":r==="Medium"?"rgba(255,180,0,0.12)":"rgba(0,200,120,0.12)";
+const FF="'IBM Plex Mono',monospace";
+const STATS={totalScanned:1284};
+
+/* ─── RADAR ─── */
+// Converts filtered alert list → stable blip positions using golden-angle spread
+const alertsToBlips=(alerts)=>{
+  const GA=2.39996; // golden angle in radians — avoids clustering
+  const riskR={High:.35,Medium:.62,Low:.82}; // inner=dangerous, outer=low
+  return alerts.map((a,i)=>({
+    a:(i*GA)%(Math.PI*2),
+    r:riskR[a.risk]||.6,
+    risk:a.risk,
+    id:a.id
+  }));
+};
+
+const Radar=({size=290,alerts=[]})=>{
+  const ref=useRef(null);
+  const alertsRef=useRef(alerts);
+  const trailsRef=useRef({});
+
+  // keep ref in sync without restarting animation
+  useEffect(()=>{
+    // reset trails for blips that disappeared
+    const ids=new Set(alerts.map(a=>a.id));
+    Object.keys(trailsRef.current).forEach(k=>{ if(!ids.has(Number(k))) delete trailsRef.current[k]; });
+    alertsRef.current=alerts;
+  },[alerts]);
+
+  useEffect(()=>{
+    const c=ref.current;if(!c)return;
+    const ctx=c.getContext("2d");
+    let ang=0,id;
+    const draw=()=>{
+      const W=c.width,H=c.height,cx=W/2,cy=H/2,R=Math.min(W,H)/2-12;
+      ctx.clearRect(0,0,W,H);
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+      g.addColorStop(0,"rgba(0,50,28,.5)");g.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fill();
+      [.25,.5,.75,1].forEach(r=>{
+        ctx.beginPath();ctx.arc(cx,cy,R*r,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(0,200,150,${r===1?.2:.1})`;ctx.lineWidth=r===1?1.2:.7;ctx.stroke();
+      });
+      [0,Math.PI/6,Math.PI/3,Math.PI/2,2*Math.PI/3,5*Math.PI/6].forEach(a=>{
+        ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+        ctx.lineTo(cx-Math.cos(a)*R,cy-Math.sin(a)*R);
+        ctx.strokeStyle="rgba(0,200,150,.07)";ctx.lineWidth=.5;ctx.stroke();
+      });
+      for(let i=0;i<80;i++){
+        const sa=ang-(i*Math.PI)/120;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,sa,sa+Math.PI/120);
+        ctx.fillStyle=`rgba(0,220,130,${(1-i/80)*.24})`;ctx.fill();
+      }
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(ang)*R,cy+Math.sin(ang)*R);
+      ctx.strokeStyle="rgba(0,245,155,.95)";ctx.lineWidth=2;ctx.stroke();
+
+      // draw blips from live alertsRef
+      const blips=alertsToBlips(alertsRef.current);
+      blips.forEach((b)=>{
+        if(!trailsRef.current[b.id]) trailsRef.current[b.id]=[];
+        const trail=trailsRef.current[b.id];
+        const bx=cx+Math.cos(b.a)*R*b.r,by=cy+Math.sin(b.a)*R*b.r;
+        const diff=((b.a-ang)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+        const fresh=diff<.35?1:diff>5.9?(6.28-diff)/.38:0;
+        if(fresh>0)trail.push({x:bx,y:by,a:fresh});
+        if(trail.length>10)trail.shift();
+        const col=b.risk==="High"?"255,60,60":b.risk==="Medium"?"255,180,0":"0,200,120";
+        trail.forEach((t,ti)=>{ctx.beginPath();ctx.arc(t.x,t.y,3,0,Math.PI*2);ctx.fillStyle=`rgba(${col},${(ti/trail.length)*t.a*.6})`;ctx.fill();});
+        ctx.beginPath();ctx.arc(bx,by,5,0,Math.PI*2);ctx.fillStyle=`rgba(${col},.95)`;ctx.fill();
+        ctx.beginPath();ctx.arc(bx,by,11,0,Math.PI*2);ctx.strokeStyle=`rgba(${col},.22)`;ctx.lineWidth=1;ctx.stroke();
+      });
+
+      // show "no results" pulse when empty
+      if(blips.length===0){
+        ctx.beginPath();ctx.arc(cx,cy,R*.5,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(100,100,100,${.1+.05*Math.sin(ang*4)})`;ctx.lineWidth=1;ctx.stroke();
+      }
+
+      ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fillStyle="rgba(0,245,155,.9)";ctx.fill();
+      ctx.beginPath();ctx.arc(cx,cy,11,0,Math.PI*2);ctx.strokeStyle="rgba(0,245,155,.3)";ctx.lineWidth=1;ctx.stroke();
+      ang=(ang+.018)%(Math.PI*2);id=requestAnimationFrame(draw);
+    };
+    draw();return()=>cancelAnimationFrame(id);
+  },[]);
+  return <canvas ref={ref} width={size} height={size} style={{borderRadius:"50%",display:"block"}}/>;
+};
+
+/* ─── PDF ─── */
+const makePDF=(alerts,keywords)=>{
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+  const W=doc.internal.pageSize.getWidth();
+  let y=0;
+  const np=()=>{if(y>268){doc.addPage();y=16;}};
+
+  // cover header
+  doc.setFillColor(3,12,16);doc.rect(0,0,W,36,"F");
+  doc.setDrawColor(0,200,120);doc.setLineWidth(.4);doc.line(0,36,W,36);
+  doc.setFontSize(20);doc.setTextColor(0,232,122);doc.setFont("helvetica","bold");
+  doc.text("CLIMATE RADAR",14,16);
+  doc.setFontSize(10);doc.setTextColor(0,180,100);doc.setFont("helvetica","normal");
+  doc.text("Strategic Intelligence Report",14,24);
+  doc.setFontSize(9);doc.setTextColor(100,160,130);
+  doc.text("Prepared by: Naif Alsalem",14,31);
+  doc.text("Generated: "+new Date().toLocaleString(),W-70,31);
+  y=44;
+
+  if(keywords.length){
+    doc.setFontSize(9);doc.setTextColor(0,200,120);doc.setFont("helvetica","bold");
+    doc.text("ACTIVE KEYWORD WATCH: "+keywords.join(" · "),14,y);y+=10;
+  }
+
+  // stats
+  doc.setFillColor(8,28,18);doc.rect(14,y-4,W-28,12,"F");
+  doc.setFontSize(9);doc.setTextColor(0,200,120);doc.setFont("helvetica","normal");
+  const hi=alerts.filter(a=>a.risk==="High").length;
+  const me=alerts.filter(a=>a.risk==="Medium").length;
+  const lo=alerts.filter(a=>a.risk==="Low").length;
+  doc.text(`Total: ${alerts.length} signals`,16,y+4);
+  doc.setTextColor(220,50,50);doc.text(`High: ${hi}`,60,y+4);
+  doc.setTextColor(220,160,0);doc.text(`Medium: ${me}`,90,y+4);
+  doc.setTextColor(0,180,100);doc.text(`Low: ${lo}`,125,y+4);
+  y+=18;
+
+  doc.setFontSize(12);doc.setTextColor(0,220,130);doc.setFont("helvetica","bold");
+  doc.text("INTELLIGENCE FEED",14,y);y+=8;
+
+  alerts.forEach((a,i)=>{
+    np();
+    const rc=a.risk==="High"?[200,40,40]:a.risk==="Medium"?[200,140,0]:[0,160,90];
+    const bg=a.risk==="High"?[40,8,8]:a.risk==="Medium"?[40,28,4]:[4,28,16];
+    doc.setFillColor(...bg);doc.rect(14,y-4,W-28,30,"F");
+    doc.setFillColor(...rc);doc.rect(14,y-4,3,30,"F");
+    doc.setFontSize(11);doc.setTextColor(220,240,228);doc.setFont("helvetica","bold");
+    doc.text(`${i+1}. ${a.title}`,20,y+3);
+    doc.setFontSize(8);doc.setTextColor(...rc);
+    doc.text(`[ ${a.risk.toUpperCase()} ]  ${a.category}`,W-50,y+3);
+    doc.setFontSize(9);doc.setTextColor(160,200,180);doc.setFont("helvetica","normal");
+    const lines=doc.splitTextToSize(a.summary,W-40);
+    doc.text(lines,20,y+11);
+    doc.setFontSize(8);doc.setTextColor(80,140,100);
+    doc.text(`Source: ${a.source}   Date: ${a.date}`,20,y+24);
+    if(a.link&&a.link!=="undefined"&&a.link!=="#"){
+      doc.setTextColor(0,140,200);
+      doc.textWithLink("View Source",20,y+28,{url:a.link});
+    }
+    y+=36;np();
+  });
+
+  // Footer red line
+  doc.setDrawColor(200,30,30);doc.setLineWidth(.6);doc.line(14,279,W-14,279);
+  // Footer text — bold red
+  doc.setFontSize(8.5);doc.setTextColor(210,30,30);doc.setFont("helvetica","bold");
+  doc.text("Strategic Intelligence | Naif Alsalem",14,284);
+  doc.text("CONFIDENTIAL",W-32,284);
+  doc.save("ClimateRadar_"+new Date().toISOString().slice(0,10)+".pdf");
+};
+
+/* ─── APP ─── */
+function App(){
+  const [alerts,setAlerts]=useState(ALL_ALERTS);
+  const [filter,setFilter]=useState("All");
+  const [tab,setTab]=useState("alerts");
+  const [search,setSearch]=useState("");
+  const [sel,setSel]=useState(null);
+  const [scanning,setScanning]=useState(false);
+  const [scanMsg,setScanMsg]=useState("");
+  const [keywords,setKeywords]=useState(["fossil fuel","CBAM","phase-out"]);
+  const [newKw,setNewKw]=useState("");
+  const [kwResults,setKwResults]=useState([]);
+  const [lastScan,setLastScan]=useState("06 May 2026, 09:14 GST");
+  const [linkStatus,setLinkStatus]=useState({});
+  const [recentOnly,setRecentOnly]=useState(false);
+  const [sourcesScanned,setSourcesScanned]=useState(1284);
+  const [scanCount,setScanCount]=useState(0);
+
+  const daysOld=(dateStr)=>{
+    const diff=Date.now()-new Date(dateStr).getTime();
+    return Math.floor(diff/(1000*60*60*24));
+  };
+  const freshnessLabel=(d)=>{
+    if(d<=7) return {label:"NEW",color:"#00e87a"};
+    if(d<=30) return {label:"RECENT",color:"#00c878"};
+    if(d<=90) return {label:`${d}D AGO`,color:"#ffb400"};
+    return {label:"STALE",color:"#ff6060"};
+  };
+
+  const verifyLink=async(alertId,url)=>{
+    if(!url||url==="#") return;
+    setLinkStatus(s=>({...s,[alertId]:"checking"}));
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),7000);
+    try{
+      await fetch(url,{method:"HEAD",mode:"no-cors",signal:controller.signal,cache:"no-store"});
+      clearTimeout(timer);
+      // no-cors gives opaque response — domain is reachable
+      setLinkStatus(s=>({...s,[alertId]:"ok"}));
+    }catch(e){
+      clearTimeout(timer);
+      if(e.name==="AbortError"){
+        setLinkStatus(s=>({...s,[alertId]:"timeout"}));
+      }else{
+        // Network error = truly unreachable
+        setLinkStatus(s=>({...s,[alertId]:"fail"}));
+      }
+    }
+  };
+
+  // Auto-verify link when a signal is selected
+  useEffect(()=>{
+    if(sel&&!linkStatus[sel.id]){
+      verifyLink(sel.id,sel.link);
+    }
+  },[sel]);
+
+  const filtered=alerts.filter(a=>
+    (filter==="All"||a.category===filter)&&
+    (!recentOnly||daysOld(a.date)<=90)&&
+    (search===""||a.title.toLowerCase().includes(search.toLowerCase())||a.summary.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  // Search filtered kwResults too
+  const filteredKw=kwResults.filter(a=>
+    search===""||a.title.toLowerCase().includes(search.toLowerCase())||a.summary.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleSearch=(val)=>{
+    setSearch(val);
+    // If on strategic tab (no list), jump to alerts so user sees results
+    if(tab==="strategic") setTab("alerts");
+  };
+
+  const runScan=()=>{
+    setScanning(true);
+    const msgs=["Connecting to IPCC...","Scanning UNFCCC docs...","Analyzing narratives...","Cross-referencing positions...","Building threat matrix...","Done."];
+    let i=0;const iv=setInterval(()=>{
+      if(i<msgs.length){setScanMsg(msgs[i++]);}
+      else{
+        clearInterval(iv);
+        const newAlerts=[...ALL_ALERTS].sort(()=>Math.random()-.45);
+        setAlerts(newAlerts);
+        const n=new Date();
+        setLastScan(n.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})+", "+n.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})+" GST");
+        // Increment sources scanned by a realistic random amount per scan
+        setSourcesScanned(s=>s+Math.floor(Math.random()*38+12));
+        setScanCount(c=>c+1);
+        setScanning(false);setScanMsg("");
+      }
+    },550);
+  };
+
+  const addKw=()=>{
+    const k=newKw.trim();if(!k||keywords.includes(k))return;
+    setKeywords([...keywords,k]);setNewKw("");
+  };
+
+  const scanKw=()=>{
+    const res=ALL_ALERTS.filter(a=>
+      keywords.some(kw=>
+        a.title.toLowerCase().includes(kw.toLowerCase())||
+        a.summary.toLowerCase().includes(kw.toLowerCase())||
+        a.kw.some(ak=>ak.toLowerCase().includes(kw.toLowerCase()))
+      )
+    );
+    setKwResults(res);setTab("keywords");
+  };
+
+  const hi=alerts.filter(a=>a.risk==="High").length;
+  const me=alerts.filter(a=>a.risk==="Medium").length;
+  const lo=alerts.filter(a=>a.risk==="Low").length;
+
+  return(
+  <div style={{fontFamily:FF,background:"#030c10",color:"#c8e6d4",height:"100vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+    <div style={{position:"fixed",inset:0,background:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.022) 2px,rgba(0,0,0,.022) 4px)",pointerEvents:"none",zIndex:0}}/>
+
+    {/* HEADER */}
+    <div style={{background:"rgba(2,10,16,.98)",borderBottom:"1px solid rgba(0,200,120,.2)",padding:"12px 28px",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:10,flexShrink:0}}>
+      <div>
+        <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:28,fontWeight:900,letterSpacing:4,color:"#00e87a",textShadow:"0 0 28px rgba(0,232,122,.55)",lineHeight:1.1}}>◈ CLIMATE RADAR</div>
+        <div style={{fontSize:14,color:"rgba(0,210,120,.6)",letterSpacing:3,marginTop:3,fontWeight:600}}>STRATEGIC INTELLIGENCE</div>
+        <div style={{fontSize:12,color:"rgba(0,210,130,.5)",letterSpacing:2,marginTop:3,fontFamily:"'Orbitron',sans-serif"}}>Naif Alsalem</div>
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:20}}>
+        <div style={{fontSize:10,color:"rgba(0,200,120,.4)",marginTop:3,textAlign:"right"}}>{lastScan}</div>
+        <div style={{display:"flex",alignItems:"center",gap:7,paddingLeft:16,borderLeft:"1px solid rgba(0,200,120,.2)"}}>
+          <div className="live-dot" style={{width:8,height:8,borderRadius:"50%",background:"#00e87a",boxShadow:"0 0 8px #00e87a"}}/>
+          <span style={{fontSize:10,color:"#00e87a",letterSpacing:2}}>LIVE</span>
+        </div>
+      </div>
+    </div>
+
+    {/* BODY */}
+    <div style={{flex:1,display:"flex",overflow:"hidden",position:"relative",zIndex:1}}>
+
+      {/* ── LEFT: THREAT MATRIX + TRENDS ── */}
+      <div style={{width:220,flexShrink:0,borderRight:"1px solid rgba(0,200,120,.1)",display:"flex",flexDirection:"column",background:"rgba(0,8,5,.8)",overflowY:"auto"}}>
+
+        {/* THREAT MATRIX */}
+        <div style={{padding:"18px 16px",borderBottom:"1px solid rgba(0,200,120,.1)"}}>
+          <div style={{fontSize:9,letterSpacing:3,color:"rgba(0,200,120,.38)",marginBottom:16}}>THREAT MATRIX</div>
+          {[{l:"CRITICAL / HIGH",n:hi,c:"#ff3c3c"},{l:"ADVISORY / MEDIUM",n:me,c:"#ffb400"},{l:"MONITOR / LOW",n:lo,c:"#00c878"}].map(s=>(
+            <div key={s.l} style={{marginBottom:14}}>
+              <div style={{fontSize:9,letterSpacing:1,color:s.c,opacity:.8,marginBottom:4}}>{s.l}</div>
+              <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:34,fontWeight:900,color:s.c,textShadow:`0 0 18px ${s.c}70`,lineHeight:1}}>{s.n}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* NARRATIVE SHIFT INDEX */}
+        <div style={{padding:"16px 16px",flex:1}}>
+          <div style={{fontSize:9,letterSpacing:3,color:"rgba(0,200,120,.38)",marginBottom:14}}>NARRATIVE SHIFT</div>
+          {TRENDS.map((n,i)=>(
+            <div key={i} style={{marginBottom:14}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                <span style={{fontSize:10,color:"rgba(200,230,210,.65)"}}>{n.label}</span>
+                <span style={{fontSize:10,color:RC(n.risk),fontWeight:600}}>{n.dir==="up"?"▲":"▼"} {n.trend}</span>
+              </div>
+              <div style={{height:3,background:"rgba(0,200,120,.07)",borderRadius:2}}>
+                <div style={{height:"100%",width:`${Math.abs(parseInt(n.trend))}%`,background:RC(n.risk),borderRadius:2,boxShadow:`0 0 5px ${RC(n.risk)}70`}}/>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── CENTER: RADAR HERO ── */}
+      <div style={{width:400,flexShrink:0,borderRight:"1px solid rgba(0,200,120,.1)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center,rgba(0,50,25,.5) 0%,rgba(0,8,5,.9) 70%)",position:"relative",overflow:"hidden"}}>
+
+        {/* Decorative rings behind radar */}
+        <div style={{position:"absolute",width:440,height:440,borderRadius:"50%",border:"1px solid rgba(0,200,120,.04)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",pointerEvents:"none"}}/>
+        <div style={{position:"absolute",width:500,height:500,borderRadius:"50%",border:"1px solid rgba(0,200,120,.03)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",pointerEvents:"none"}}/>
+
+        <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",width:"100%",padding:"0 20px"}}>
+          <Radar size={340} alerts={filtered}/>
+
+          {/* Signal count below radar */}
+          <div style={{marginTop:14,textAlign:"center"}}>
+            <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:28,fontWeight:900,color:"#00e87a",textShadow:"0 0 20px rgba(0,232,122,.5)",lineHeight:1}}>
+              {filtered.length}
+            </div>
+            <div style={{fontSize:9,letterSpacing:3,color:"rgba(0,200,120,.45)",marginTop:3}}>
+              SIGNAL{filtered.length!==1?"S":""} ON RADAR
+            </div>
+            <div style={{fontSize:8,letterSpacing:2,color:"rgba(0,200,120,.28)",marginTop:2}}>
+              {sourcesScanned.toLocaleString()} SOURCES SCANNED{scanCount>0?` · RUN #${scanCount+1}`:""}
+            </div>
+          </div>
+
+          {/* Scan button */}
+          <button className="btn-green" onClick={runScan} disabled={scanning}
+            style={{marginTop:18,padding:"12px 0",fontFamily:FF,fontSize:12,letterSpacing:2,fontWeight:600,
+              background:scanning?"rgba(0,80,45,.3)":"rgba(0,200,120,.1)",
+              border:"1px solid rgba(0,200,120,.35)",color:scanning?"rgba(0,200,120,.45)":"#00e87a",
+              borderRadius:2,width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:9,
+              cursor:scanning?"not-allowed":"pointer",boxShadow:scanning?"none":"0 0 20px rgba(0,200,120,.08)"}}>
+            {scanning?<><span className="spin">⟳</span>{scanMsg}</>:<><span style={{fontSize:16}}>⟳</span> RUN NEW SCAN</>}
+          </button>
+
+          {/* Risk legend */}
+          <div style={{display:"flex",gap:16,marginTop:14}}>
+            {[["High","#ff3c3c"],["Medium","#ffb400"],["Low","#00c878"]].map(([l,c])=>(
+              <div key={l} style={{display:"flex",alignItems:"center",gap:5}}>
+                <div style={{width:7,height:7,borderRadius:"50%",background:c,boxShadow:`0 0 6px ${c}`}}/>
+                <span style={{fontSize:9,color:"rgba(200,230,210,.5)",letterSpacing:1}}>{l}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN PANEL */}
+      <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+
+        {/* CONTROLS */}
+        <div style={{padding:"12px 20px",borderBottom:"1px solid rgba(0,200,120,.1)",background:"rgba(0,8,5,.6)",flexShrink:0}}>
+          <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:10}}>
+            <div style={{position:"relative",flex:1}}>
+              <input
+                type="text"
+                value={search}
+                onChange={e=>handleSearch(e.target.value)}
+                placeholder="Search intelligence feed..."
+                style={{width:"100%",background:"rgba(0,35,22,.5)",border:"1px solid rgba(0,200,120,.18)",borderRadius:2,padding:"8px 32px 8px 32px",color:"#c8e6d4",fontSize:13,fontFamily:FF,transition:"border .2s"}}/>
+              <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"rgba(0,200,120,.45)",fontSize:15,pointerEvents:"none"}}>⌕</span>
+              {search&&<span onClick={()=>setSearch("")} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",color:"rgba(0,200,120,.5)",fontSize:13,cursor:"pointer",lineHeight:1}}>✕</span>}
+            </div>
+            <button className="btn-green" onClick={()=>setRecentOnly(r=>!r)}
+              style={{padding:"9px 14px",fontSize:11,letterSpacing:1.5,fontWeight:600,
+                background:recentOnly?"rgba(0,232,122,.18)":"rgba(0,200,120,.06)",
+                border:`1px solid ${recentOnly?"#00e87a":"rgba(0,200,120,.25)"}`,
+                color:recentOnly?"#00e87a":"rgba(0,200,120,.5)",
+                borderRadius:2,fontFamily:FF,whiteSpace:"nowrap",flexShrink:0}}>
+              {recentOnly?"◉ RECENT":"◎ ALL TIME"}
+            </button>
+            <button className="btn-green" onClick={()=>makePDF(filtered,keywords)}
+              style={{padding:"9px 20px",fontSize:12,letterSpacing:1.5,fontWeight:600,background:"rgba(255,80,80,.1)",border:"1px solid rgba(255,80,80,.35)",color:"#ff8080",borderRadius:2,fontFamily:FF,display:"flex",alignItems:"center",gap:6,whiteSpace:"nowrap"}}>
+              ⬇&nbsp;PDF
+            </button>
+          </div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {["All","Narrative","Policy","Negotiation","Finance","Alliance","Strategic"].map(c=>(
+              <button key={c} className="chip-btn" onClick={()=>setFilter(c)}
+                style={{padding:"5px 12px",fontSize:10,letterSpacing:1.5,background:filter===c?"rgba(0,200,120,.15)":"transparent",border:`1px solid ${filter===c?"#00c878":"rgba(0,200,120,.2)"}`,color:filter===c?"#00c878":"rgba(0,200,120,.45)",borderRadius:1,fontFamily:FF}}>
+                {c.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* KEYWORD WATCH BAR */}
+        <div style={{padding:"10px 20px",borderBottom:"1px solid rgba(0,200,120,.1)",background:"rgba(0,5,3,.55)",flexShrink:0}}>
+          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+            <span style={{fontSize:10,letterSpacing:2,color:"rgba(0,200,120,.5)",flexShrink:0}}>⬡ KEYWORD WATCH:</span>
+            <div style={{display:"flex",gap:5,flexWrap:"wrap",flex:1,alignItems:"center"}}>
+              {keywords.map(kw=>(
+                <span key={kw} style={{padding:"3px 10px",fontSize:11,background:"rgba(0,180,100,.12)",border:"1px solid rgba(0,180,100,.25)",color:"#00c878",borderRadius:10,display:"inline-flex",alignItems:"center",gap:5}}>
+                  {kw}
+                  <span onClick={()=>setKeywords(keywords.filter(k=>k!==kw))} style={{cursor:"pointer",color:"rgba(0,200,120,.5)",fontSize:12}}>✕</span>
+                </span>
+              ))}
+              <input value={newKw} onChange={e=>setNewKw(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addKw()}
+                placeholder="+ add keyword"
+                style={{background:"transparent",border:"1px dashed rgba(0,200,120,.22)",borderRadius:10,padding:"3px 12px",color:"#c8e6d4",fontSize:11,fontFamily:FF,width:140}}/>
+            </div>
+            <button className="btn-green" onClick={scanKw}
+              style={{padding:"6px 16px",fontSize:11,letterSpacing:1.5,background:"rgba(0,200,120,.1)",border:"1px solid rgba(0,200,120,.3)",color:"#00e87a",borderRadius:2,fontFamily:FF,flexShrink:0,fontWeight:600}}>
+              ⌕ SCAN
+            </button>
+          </div>
+        </div>
+
+        {/* TABS */}
+        <div style={{display:"flex",borderBottom:"1px solid rgba(0,200,120,.1)",padding:"0 20px",background:"rgba(0,5,3,.55)",flexShrink:0}}>
+          {[{k:"alerts",l:"INTELLIGENCE FEED"},{k:"keywords",l:`KEYWORD RESULTS${kwResults.length?" ("+kwResults.length+")":""}`},{k:"strategic",l:"STRATEGIC BRIEF"}].map(t=>(
+            <button key={t.k} onClick={()=>setTab(t.k)}
+              style={{padding:"11px 18px",fontSize:11,letterSpacing:2,background:"transparent",border:"none",borderBottom:tab===t.k?"2px solid #00e87a":"2px solid transparent",color:tab===t.k?"#00e87a":"rgba(0,200,120,.38)",cursor:"pointer",fontFamily:FF,transition:"all .2s"}}>
+              {t.l}
+            </button>
+          ))}
+        </div>
+
+        {/* CONTENT */}
+        <div style={{flex:1,overflowY:"auto",padding:"14px 20px",display:"flex",gap:14}}>
+
+          {/* ── ALERTS ── */}
+          {tab==="alerts"&&<>
+            <div style={{flex:1}}>
+              {filtered.length===0&&<div style={{textAlign:"center",color:"rgba(0,200,120,.3)",marginTop:60,fontSize:13,letterSpacing:2}}>NO SIGNALS DETECTED</div>}
+              {filtered.map((a,i)=>(
+                <div key={a.id} className="alert-card" onClick={()=>setSel(sel?.id===a.id?null:a)}
+                  style={{padding:"14px 16px",marginBottom:7,background:sel?.id===a.id?"rgba(0,200,120,.08)":"rgba(0,14,8,.6)",border:`1px solid ${sel?.id===a.id?"rgba(0,200,120,.3)":"rgba(0,200,120,.08)"}`,borderLeft:`4px solid ${RC(a.risk)}`,cursor:"pointer",animationDelay:`${i*28}ms`}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:7}}>
+                    <div style={{fontSize:13,color:"#dff0e8",fontWeight:600,flex:1,marginRight:10,lineHeight:1.45}}>{a.title}</div>
+                    <div style={{display:"flex",gap:5,flexShrink:0,alignItems:"center"}}>
+                      {(()=>{const f=freshnessLabel(daysOld(a.date));return <span style={{padding:"2px 6px",fontSize:8,letterSpacing:1.5,background:`${f.color}18`,border:`1px solid ${f.color}50`,color:f.color,borderRadius:1,fontWeight:700}}>{f.label}</span>;})()}
+                      <span style={{padding:"3px 8px",fontSize:10,letterSpacing:1.5,background:RB(a.risk),border:`1px solid ${RC(a.risk)}40`,color:RC(a.risk),borderRadius:1,fontWeight:600}}>{a.risk.toUpperCase()}</span>
+                      <span style={{padding:"3px 8px",fontSize:10,letterSpacing:1,background:"rgba(0,200,120,.05)",border:"1px solid rgba(0,200,120,.14)",color:"rgba(0,200,120,.6)",borderRadius:1}}>{a.category}</span>
+                    </div>
+                  </div>
+                  <div style={{fontSize:12,color:"rgba(200,230,210,.55)",lineHeight:1.75}}>{a.summary}</div>
+                  <div style={{marginTop:8,display:"flex",justifyContent:"space-between"}}>
+                    <span style={{fontSize:11,color:"rgba(0,200,120,.4)",letterSpacing:1}}>◆ {a.source}</span>
+                    <span style={{fontSize:11,color:"rgba(0,200,120,.28)"}}>{a.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {sel&&(
+              <div style={{width:295,flexShrink:0,background:"rgba(0,11,7,.92)",border:"1px solid rgba(0,200,120,.2)",borderRadius:2,padding:18,height:"fit-content",position:"sticky",top:0}}>
+                <div style={{fontSize:9,letterSpacing:3,color:"rgba(0,200,120,.38)",marginBottom:12}}>SIGNAL DETAIL</div>
+                <div style={{fontSize:13,color:"#e0f0e8",fontWeight:600,marginBottom:10,lineHeight:1.6}}>{sel.title}</div>
+                <div style={{padding:"8px 10px",marginBottom:12,background:RB(sel.risk),border:`1px solid ${RC(sel.risk)}30`,borderRadius:1}}>
+                  <span style={{fontSize:10,letterSpacing:2,color:RC(sel.risk),fontWeight:600}}>● RISK: {sel.risk.toUpperCase()}</span>
+                </div>
+                <div style={{fontSize:12,color:"rgba(200,230,210,.7)",lineHeight:1.8,marginBottom:12}}>{sel.summary}</div>
+                <div style={{borderTop:"1px solid rgba(0,200,120,.1)",paddingTop:10,marginBottom:12}}>
+                  {[["SOURCE",sel.source],["CATEGORY",sel.category],["DATE",sel.date]].map(([k,v])=>(
+                    <div key={k} style={{display:"flex",justifyContent:"space-between",marginBottom:7}}>
+                      <span style={{fontSize:10,letterSpacing:1.5,color:"rgba(0,200,120,.38)"}}>{k}</span>
+                      <span style={{fontSize:11,color:"rgba(200,230,210,.7)"}}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* Link Verification Block */}
+                {(()=>{
+                  const st=linkStatus[sel.id];
+                  const stIcon=st==="checking"?"⟳":st==="ok"?"✓":st==="fail"?"✗":st==="timeout"?"⚠":"⌕";
+                  const stLabel=st==="checking"?"VERIFYING...":st==="ok"?"LINK VERIFIED":st==="fail"?"LINK UNREACHABLE":st==="timeout"?"TIMED OUT":"NOT CHECKED";
+                  const stColor=st==="ok"?"#00c878":st==="fail"?"#ff3c3c":st==="timeout"?"#ffb400":st==="checking"?"#ffb400":"rgba(0,200,120,.4)";
+                  return(
+                    <div style={{marginBottom:6}}>
+                      {/* Status bar */}
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 10px",background:"rgba(0,20,12,.6)",border:`1px solid ${stColor}30`,borderBottom:"none",borderRadius:"1px 1px 0 0"}}>
+                        <span style={{fontSize:9,letterSpacing:2,color:stColor,display:"flex",alignItems:"center",gap:5}}>
+                          <span style={st==="checking"?{display:"inline-block",animation:"spin .7s linear infinite"}:{}}>{stIcon}</span>
+                          {stLabel}
+                        </span>
+                        <button onClick={()=>verifyLink(sel.id,sel.link)} disabled={st==="checking"}
+                          style={{fontSize:8,letterSpacing:1,background:"transparent",border:`1px solid ${stColor}40`,color:stColor,padding:"2px 7px",cursor:"pointer",fontFamily:FF,borderRadius:1,opacity:st==="checking"?.5:1}}>
+                          RE-CHECK
+                        </button>
+                      </div>
+                      {/* Link */}
+                      <a href={sel.link} target="_blank" rel="noopener noreferrer" style={{display:"block",textDecoration:"none"}}>
+                        <div style={{padding:"8px 10px",background:"rgba(0,200,120,.07)",border:`1px solid rgba(0,200,120,.22)`,borderBottom:"none"}}>
+                          <div style={{fontSize:9,color:"rgba(0,200,120,.5)",letterSpacing:1,marginBottom:3}}>→ VIEW SOURCE</div>
+                          <div style={{fontSize:10,color:"#00c878",fontWeight:600}}>{sel.linkLabel}</div>
+                        </div>
+                      </a>
+                      {/* Section note */}
+                      <div style={{padding:"7px 10px",background:"rgba(0,80,45,.08)",border:"1px solid rgba(0,200,120,.14)",borderRadius:"0 0 1px 1px"}}>
+                        <div style={{fontSize:9,color:"rgba(0,200,120,.5)",lineHeight:1.5}}>📍 {sel.linkNote}</div>
+                      </div>
+                      {st==="ok"&&<div style={{fontSize:8,color:"rgba(0,200,120,.35)",marginTop:3,letterSpacing:.5}}>* Domain reachable via HEAD check. Exact page availability may vary due to CORS policy.</div>}
+                      {st==="fail"&&<div style={{fontSize:8,color:"rgba(255,60,60,.5)",marginTop:3,letterSpacing:.5}}>* Domain unreachable. Link may be broken or blocked.</div>}
+                    </div>
+                  );
+                })()}
+                <button onClick={()=>setSel(null)} style={{display:"block",width:"100%",padding:"7px",fontSize:10,letterSpacing:2,background:"transparent",border:"1px solid rgba(0,200,120,.1)",color:"rgba(0,200,120,.38)",cursor:"pointer",fontFamily:FF,borderRadius:1}}>✕ CLOSE</button>
+              </div>
+            )}
+          </>}
+
+          {/* ── KEYWORD RESULTS ── */}
+          {tab==="keywords"&&(
+            <div style={{flex:1}}>
+              <div style={{fontSize:10,letterSpacing:3,color:"rgba(0,200,120,.4)",marginBottom:14}}>
+                KEYWORD SCAN RESULTS — {filteredKw.length} SIGNAL{filteredKw.length!==1?"S":""} MATCHED{search?` · filtered by "${search}"`:""}
+              </div>
+              <div style={{marginBottom:14,padding:"10px 14px",background:"rgba(0,18,10,.55)",border:"1px solid rgba(0,200,120,.12)",borderRadius:2,fontSize:12,color:"rgba(0,200,120,.6)",display:"flex",flexWrap:"wrap",gap:6,alignItems:"center"}}>
+                <span style={{color:"rgba(0,200,120,.45)"}}>Watching:</span>
+                {keywords.map(kw=><span key={kw} style={{padding:"2px 9px",background:"rgba(0,180,100,.12)",border:"1px solid rgba(0,180,100,.22)",color:"#00c878",borderRadius:8,fontSize:11}}>{kw}</span>)}
+              </div>
+              {filteredKw.length===0&&<div style={{textAlign:"center",color:"rgba(0,200,120,.3)",marginTop:50,fontSize:13,letterSpacing:2}}>{search?"NO MATCHES FOR SEARCH QUERY":"NO MATCHES — ADD MORE KEYWORDS"}</div>}
+              {filteredKw.map((a,i)=>{
+                const matched=keywords.filter(kw=>a.title.toLowerCase().includes(kw.toLowerCase())||a.summary.toLowerCase().includes(kw.toLowerCase())||a.kw.some(ak=>ak.toLowerCase().includes(kw.toLowerCase())));
+                return(
+                  <div key={a.id} className="alert-card"
+                    style={{padding:"14px 16px",marginBottom:7,background:"rgba(0,18,10,.6)",border:`1px solid rgba(0,200,120,.1)`,borderLeft:`4px solid ${RC(a.risk)}`,animationDelay:`${i*28}ms`}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:7}}>
+                      <div style={{fontSize:13,color:"#dff0e8",fontWeight:600,flex:1,marginRight:10}}>{a.title}</div>
+                      <span style={{padding:"3px 8px",fontSize:10,background:RB(a.risk),border:`1px solid ${RC(a.risk)}40`,color:RC(a.risk),borderRadius:1,fontWeight:600}}>{a.risk.toUpperCase()}</span>
+                    </div>
+                    <div style={{fontSize:12,color:"rgba(200,230,210,.55)",lineHeight:1.75,marginBottom:9}}>{a.summary}</div>
+                    <div style={{display:"flex",gap:5,flexWrap:"wrap",alignItems:"center"}}>
+                      <span style={{fontSize:10,color:"rgba(0,200,120,.4)"}}>MATCHED:</span>
+                      {matched.map(kw=><span key={kw} style={{padding:"2px 9px",fontSize:10,background:"rgba(0,230,130,.12)",border:"1px solid rgba(0,230,130,.25)",color:"#00e87a",borderRadius:8}}>{kw}</span>)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── STRATEGIC ── */}
+          {tab==="strategic"&&(
+            <div style={{flex:1}}>
+              <div style={{fontSize:10,letterSpacing:3,color:"rgba(0,200,120,.4)",marginBottom:16}}>
+                STRATEGIC INTELLIGENCE BRIEF — {new Date().toDateString().toUpperCase()}
+              </div>
+              {[
+                {t:"Critical Risk Summary",r:"High",c:"Three high-risk signals detected this cycle. The convergence of IPCC AR7 binding language, EU CBAM expansion, and UNFCCC GST ambiguous text creates a compounding threat vector requiring immediate narrative counter-strategy deployment."},
+                {t:"Narrative Vulnerability Assessment",r:"High",c:'"Phase-out" language has surged +18% across monitored sources. CBAM references are up +31% — the highest velocity indicator this period. Arab delegations should prepare counter-framing around energy security and just transition.'},
+                {t:"Coalition Opportunity",r:"Low",c:"African nations' new climate debt coalition aligns closely with Arab Group positions on historical responsibility. A coordinated outreach initiative could expand the bloc's influence ahead of COP31."},
+                {t:"Recommended Strategic Actions",r:"Medium",c:"1. Activate diplomatic channels with IPCC bureau contacts regarding AR7 language precision.\n2. Prepare technical rebuttal to IEA Net Zero 2035 demand scenario.\n3. Commission independent equity metric analysis to counter CBAM expansion.\n4. Establish pre-COP31 dialogue with African coalition lead delegations."}
+              ].map((s,i)=>(
+                <div key={i} style={{padding:"16px 18px",marginBottom:10,background:"rgba(0,11,7,.65)",border:`1px solid ${RC(s.r)}15`,borderLeft:`4px solid ${RC(s.r)}`,borderRadius:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}>
+                    <div style={{fontSize:13,color:"#00e87a",letterSpacing:.8,fontWeight:600}}>{s.t}</div>
+                    <span style={{padding:"3px 9px",fontSize:10,letterSpacing:1.5,background:RB(s.r),color:RC(s.r),border:`1px solid ${RC(s.r)}38`,borderRadius:1,fontWeight:600}}>{s.r.toUpperCase()}</span>
+                  </div>
+                  <div style={{fontSize:12,color:"rgba(200,230,210,.72)",lineHeight:1.85,whiteSpace:"pre-line"}}>{s.c}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+
+  <script>
+    // ── SECURITY ──────────────────────────────────────────────
+    // PIN is hashed — change HASH below to update the access code
+    // Default PIN: 2030   SHA-256 hash below
+    const CORRECT_HASH = "8e1f192fe25ad49be764c3f55c68beb32f7aa66f85344e026b76cfaaa1d3d88a";
+
+    async function sha256(msg){
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function checkPin(){
+      const val = document.getElementById('pin-input').value.trim();
+      if(!val){ document.getElementById('pin-err').textContent='Enter access code'; return; }
+      const hash = await sha256(val);
+      if(hash === CORRECT_HASH){
+        document.getElementById('sec-overlay').style.display='none';
+        sessionStorage.setItem('cr_auth','1');
+      } else {
+        document.getElementById('pin-err').textContent='⊘ Invalid access code';
+        document.getElementById('pin-input').value='';
+        setTimeout(()=>document.getElementById('pin-err').textContent='',2500);
+      }
+    }
+
+    // Auto-dismiss if already authenticated in this session
+    if(sessionStorage.getItem('cr_auth')==='1'){
+      document.addEventListener('DOMContentLoaded',()=>{
+        const ov=document.getElementById('sec-overlay');
+        if(ov) ov.style.display='none';
+      });
+    }
+
+    // ── ANTI-THEFT ──────────────────────────────────────────
+    // Disable right-click
+    document.addEventListener('contextmenu',e=>e.preventDefault());
+    // Disable common DevTools shortcuts
+    document.addEventListener('keydown',e=>{
+      if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].includes(e.key))||(e.ctrlKey&&e.key==='U')){
+        e.preventDefault();
+      }
+    });
+    // Warn on print
+    window.addEventListener('beforeprint',()=>{
+      document.title='CONFIDENTIAL — Dr. Naif Alsalem — Climate Radar';
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-05-06",
+  "maintainer": "Naif Alsalem",
+  "default_keywords": [
+    "fossil fuel",
+    "CBAM",
+    "phase-out"
+  ],
+  "recommended_additions": {
+    "threat_terms": [
+      "unabated fossil fuels",
+      "carbon border",
+      "binding target",
+      "fossil fuel subsidy",
+      "net zero mandate"
+    ],
+    "negotiation_track": [
+      "Article 6",
+      "GST",
+      "loss and damage",
+      "just transition",
+      "NDC",
+      "CBDR",
+      "historical responsibility"
+    ],
+    "saudi_arab_strategic": [
+      "GCC",
+      "Arab Group",
+      "Vision 2030",
+      "oil demand",
+      "petrochemicals",
+      "energy security",
+      "natural gas"
+    ],
+    "institutional": [
+      "IPCC",
+      "UNFCCC",
+      "IEA",
+      "UNEP",
+      "G7",
+      "COP31"
+    ],
+    "emerging_risks": [
+      "methane",
+      "flaring",
+      "OGMP",
+      "satellite monitoring",
+      "blue carbon"
+    ]
+  }
+}

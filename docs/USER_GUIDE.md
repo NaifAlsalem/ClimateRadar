@@ -1,0 +1,113 @@
+# User Guide — Climate Radar
+
+## Getting Started
+
+1. Open `index.html` in your browser (Chrome or Edge recommended)
+2. Enter your access code at the authentication screen
+3. The dashboard loads automatically — the radar begins scanning
+
+---
+
+## Interface Overview
+
+### Left Column — Intelligence Metrics
+- **Threat Matrix** — live count of High / Medium / Low risk signals
+- **Narrative Shift Index** — directional trend bars for key climate language
+
+### Center Column — Radar
+- **Live radar display** — each blip represents an active signal
+  - 🔴 Red blips = High risk (inner ring — closest to center)
+  - 🟡 Yellow blips = Medium risk (middle ring)
+  - 🟢 Green blips = Low risk (outer ring)
+- **Signal counter** — updates as you filter
+- **Sources Scanned** — increments with each new scan run
+- **RUN NEW SCAN** — re-sorts and refreshes the signal feed
+
+### Right Column — Intelligence Feed
+
+#### Search Bar
+Type any term to instantly filter signals across all tabs. Press ✕ to clear.
+
+#### ALL TIME / RECENT Toggle
+- **ALL TIME** — shows all signals regardless of age
+- **RECENT** — filters to signals from the last 90 days only
+
+#### Category Filters
+Click any chip to filter by: Narrative · Policy · Negotiation · Finance · Alliance · Strategic
+
+#### ⬇ PDF Button
+Downloads a classified PDF report of all currently visible signals.
+
+---
+
+## Signal Cards
+
+Each card shows:
+- **Freshness badge** — NEW / RECENT / age / STALE
+- **Risk badge** — HIGH / MEDIUM / LOW
+- **Category**
+- **Summary**
+- **Source** and **date**
+
+Click any card to open the **Signal Detail** panel on the right.
+
+---
+
+## Signal Detail Panel
+
+Shows full signal information including:
+- Risk classification
+- Full summary
+- Source, category, date
+- **Link Verification** — automatically checks if the source URL is reachable
+  - ✓ LINK VERIFIED — domain is reachable
+  - ✗ LINK UNREACHABLE — domain could not be reached
+  - ⚠ TIMED OUT — no response within 7 seconds
+  - RE-CHECK button to re-verify manually
+- **VIEW SOURCE** — opens the source page in a new tab
+- **📍 Section note** — tells you exactly where in the document the signal appears
+
+---
+
+## Keyword Watch
+
+Use the keyword bar to track specific terms across all signals:
+
+1. Type a keyword in the input field and press **Enter** (or click **+ add keyword**)
+2. Click **⌕ SCAN** to run the keyword search
+3. Switch to the **KEYWORD RESULTS** tab to see matches
+4. Matched keywords are highlighted on each card
+5. Click ✕ next to any keyword to remove it
+
+**Default keywords:** fossil fuel · CBAM · phase-out
+
+**Suggested keywords to add:** carbon tax · net zero · oil demand · Arab Group · GCC · Article 6 · loss and damage
+
+---
+
+## PDF Export
+
+The PDF report includes:
+- Header with title and generation timestamp
+- Active keyword watchlist
+- Stats bar (total, High/Medium/Low counts)
+- All currently filtered signals with full details and hyperlinks
+- Classified footer: `Strategic Intelligence | Naif Alsalem · CONFIDENTIAL`
+
+> **Tip:** Apply filters before exporting — the PDF always reflects what is currently visible on screen.
+
+---
+
+## Access Code Management
+
+The default access code is distributed separately. To change it:
+
+1. Generate a SHA-256 hash of your new code:
+   ```bash
+   python3 -c "import hashlib; print(hashlib.sha256('NEWCODE'.encode()).hexdigest())"
+   ```
+2. Open `index.html` in a text editor
+3. Find `const CORRECT_HASH = "..."` and replace with the new hash
+4. Save and re-deploy
+
+Never store the PIN in plain text anywhere in the repository.
