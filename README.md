@@ -1,4 +1,4 @@
-# Climate Radar — Strategic Intelligence Platform
+# Climate Radar: A Strategic Intelligence Platform
 
 A browser-based strategic intelligence dashboard for monitoring, analyzing, 
 and reporting on global climate negotiation signals in real time.
