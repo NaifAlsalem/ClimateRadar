@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Climate Radar â€” Naif Alsalem</title>
+<title>Climate Radar — Naif Alsalem</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -36,7 +36,7 @@ input::placeholder{color:rgba(0,180,100,.35)}
 <script type="text/babel">
 const {useState,useEffect,useRef}=React;
 
-// Dynamic date helper â€” always relative to today when the app runs
+// Dynamic date helper — always relative to today when the app runs
 const daysAgo=(n)=>{
   const d=new Date();
   d.setDate(d.getDate()-n);
@@ -48,181 +48,181 @@ const ALL_ALERTS=[
     summary:"New draft introduces binding language around fossil fuel phase-out timelines that could directly impact GCC economic strategies.",
     link:"https://www.ipcc.ch/assessment-report/ar7/",
     linkLabel:"ipcc.ch / AR7 Overview",
-    linkNote:"AR7 WG3 (Mitigation) in progress â€” outlines agreed Feb 2025, Hangzhou. Full report expected 2027â€“2028.",
+    linkNote:"AR7 WG3 (Mitigation) in progress — outlines agreed Feb 2025, Hangzhou. Full report expected 2027–2028.",
     kw:["IPCC","fossil fuel","phase-out","GCC"]},
   {id:2,title:"EU Carbon Border Adjustment Expansion",source:"EU Commission",risk:"High",category:"Policy",date:daysAgo(2),
-    summary:"Proposed expansion of CBAM to include petrochemicals and fertilizers â€” critical export sectors for Saudi Arabia.",
+    summary:"Proposed expansion of CBAM to include petrochemicals and fertilizers — critical export sectors for Saudi Arabia.",
     link:"https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en",
     linkLabel:"ec.europa.eu / CBAM Official Page",
-    linkNote:"Annex I product list â€” scope expansion under revision",
+    linkNote:"Annex I product list — scope expansion under revision",
     kw:["CBAM","carbon border","petrochemicals","Saudi"]},
   {id:3,title:"G7 Climate Finance Pledge Shift",source:"G7 Presidency",risk:"Medium",category:"Finance",date:daysAgo(3),
     summary:"New framing shifts climate finance from grants to loans, reducing support for developing nations' adaptation.",
     link:"https://g7.gc.ca/en/g7-presidency/",
     linkLabel:"g7.gc.ca / Canada G7 2025 Presidency",
-    linkNote:"Climate Finance communique â€” Section 4, para. 18 (grant vs. loan framing)",
+    linkNote:"Climate Finance communique — Section 4, para. 18 (grant vs. loan framing)",
     kw:["climate finance","G7","loans"]},
   {id:4,title:"UNFCCC GST Outcome Text Draft",source:"UNFCCC",risk:"High",category:"Negotiation",date:daysAgo(4),
     summary:"Global Stocktake outcome references 'unabated fossil fuels' with ambiguous language that may set restrictive precedents.",
     link:"https://unfccc.int/topics/global-stocktake",
     linkLabel:"unfccc.int / Global Stocktake Hub",
-    linkNote:"Synthesis Report Ch. 3.2: Mitigation â€” 'unabated fossil fuels' paragraph",
+    linkNote:"Synthesis Report Ch. 3.2: Mitigation — 'unabated fossil fuels' paragraph",
     kw:["UNFCCC","fossil fuels","GST"]},
   {id:5,title:"IEA Net Zero Pathway Update",source:"IEA",risk:"Medium",category:"Narrative",date:daysAgo(5),
-    summary:"Updated scenario models show accelerated demand decline for oil by 2035 â€” 8 years earlier than previous projections.",
+    summary:"Updated scenario models show accelerated demand decline for oil by 2035 — 8 years earlier than previous projections.",
     link:"https://www.iea.org/reports/world-energy-outlook-2025/stated-policies-scenario",
-    linkLabel:"iea.org / WEO 2025 â€” Stated Policies Scenario",
-    linkNote:"Oil demand peaks ~2030 then declines â€” see fossil fuel demand trajectory tables",
+    linkLabel:"iea.org / WEO 2025 — Stated Policies Scenario",
+    linkNote:"Oil demand peaks ~2030 then declines — see fossil fuel demand trajectory tables",
     kw:["IEA","net zero","oil demand"]},
   {id:6,title:"Saudi Vision 2030 Climate Alignment",source:"KPMG",risk:"Low",category:"Strategic",date:daysAgo(6),
     summary:"Third-party assessment confirms Saudi renewable targets are on track, providing positive narrative leverage.",
     link:"https://www.vision2030.gov.sa/en/",
     linkLabel:"vision2030.gov.sa / Official Portal",
-    linkNote:"Energy & Environment pillar â€” renewable capacity milestones & sustainability targets",
+    linkNote:"Energy & Environment pillar — renewable capacity milestones & sustainability targets",
     kw:["Saudi","Vision 2030","renewables"]},
   {id:7,title:"African Nations Climate Debt Coalition",source:"AU Summit",risk:"Low",category:"Alliance",date:daysAgo(7),
-    summary:"New African bloc positions align with Arab Group on historical responsibility â€” potential for coalition building.",
+    summary:"New African bloc positions align with Arab Group on historical responsibility — potential for coalition building.",
     link:"https://au.int/en/climatechange",
     linkLabel:"au.int / AU Climate Change",
-    linkNote:"AU Climate Declaration 2025 â€” Art. 7: Historical Responsibility & Loss and Damage",
+    linkNote:"AU Climate Declaration 2025 — Art. 7: Historical Responsibility & Loss and Damage",
     kw:["Africa","Arab Group","coalition","loss and damage"]},
-  {id:8,title:"COP31 Agenda Leak â€” Loss and Damage",source:"UNFCCC",risk:"Medium",category:"Negotiation",date:daysAgo(9),
+  {id:8,title:"COP31 Agenda Leak — Loss and Damage",source:"UNFCCC",risk:"Medium",category:"Negotiation",date:daysAgo(9),
     summary:"Preliminary agenda shows Loss and Damage fund governance dispute to be a central flashpoint.",
     link:"https://unfccc.int/fund-for-responding-to-loss-and-damage",
     linkLabel:"unfccc.int / Fund for Responding to Loss & Damage",
-    linkNote:"Board governance section â€” composition dispute & Board meeting reports (2024â€“2025)",
+    linkNote:"Board governance section — composition dispute & Board meeting reports (2024–2025)",
     kw:["COP31","loss and damage","governance"]},
   {id:9,title:"Carbon Market Article 6 Stalemate",source:"UNFCCC Bulletin",risk:"Medium",category:"Policy",date:daysAgo(12),
     summary:"Article 6.4 mechanism facing governance deadlock; could undermine voluntary carbon market credibility.",
     link:"https://unfccc.int/process-and-meetings/the-paris-agreement/the-glasgow-climate-pact/cop26-outcomes-market-mechanisms-and-non-market-approaches-article-6",
-    linkLabel:"unfccc.int / Article 6 â€” COP26 Outcomes",
-    linkNote:"Art. 6.4 Supervisory Body rules â€” mechanism operationalization & stalled credit issuance",
+    linkLabel:"unfccc.int / Article 6 — COP26 Outcomes",
+    linkNote:"Art. 6.4 Supervisory Body rules — mechanism operationalization & stalled credit issuance",
     kw:["Article 6","carbon market","voluntary"]},
-  {id:10,title:"Methane Pledge Gap Warning â€” COP30 Status Report",source:"UNEP / GMP Ministerial",risk:"High",category:"Narrative",date:daysAgo(18),
-    summary:"UNEP's 2025 Global Methane Status Report warns emissions still rising despite GMP commitments. NDCs could deliver only 8% cut vs. 30% target â€” oil & gas implementation gap remains the critical pressure point for producers like Saudi Arabia.",
+  {id:10,title:"Methane Pledge Gap Warning — COP30 Status Report",source:"UNEP / GMP Ministerial",risk:"High",category:"Narrative",date:daysAgo(18),
+    summary:"UNEP's 2025 Global Methane Status Report warns emissions still rising despite GMP commitments. NDCs could deliver only 8% cut vs. 30% target — oil & gas implementation gap remains the critical pressure point for producers like Saudi Arabia.",
     link:"https://www.globalmethanepledge.org/news/highlights-2025-global-methane-pledge-ministerial",
     linkLabel:"globalmethanepledge.org / COP30 Ministerial Highlights",
-    linkNote:"Oil & Gas Methane Partnership 2.0 â€” 42% of global production covered. Implementation gap section.",
+    linkNote:"Oil & Gas Methane Partnership 2.0 — 42% of global production covered. Implementation gap section.",
     kw:["methane","oil gas","pledge","emissions","COP30"]},
   {id:11,title:"World Bank Fossil Fuel Financing Phase-Down",source:"World Bank",risk:"High",category:"Finance",date:daysAgo(13),
-    summary:"World Bank accelerates timeline to phase down direct financing of upstream oil & gas projects â€” threatens development finance options for GCC energy infrastructure.",
+    summary:"World Bank accelerates timeline to phase down direct financing of upstream oil & gas projects — threatens development finance options for GCC energy infrastructure.",
     link:"https://www.worldbank.org/en/topic/climatechange",
     linkLabel:"worldbank.org / Climate Change Hub",
-    linkNote:"Energy Sector financing policy â€” upstream fossil fuel exclusion timeline",
+    linkNote:"Energy Sector financing policy — upstream fossil fuel exclusion timeline",
     kw:["World Bank","fossil fuel","finance","oil gas","upstream"]},
   {id:12,title:"COP30 Belem NDC Ambition Ratchet Decision",source:"UNFCCC / COP30",risk:"High",category:"Negotiation",date:daysAgo(15),
-    summary:"COP30 Belem decision establishes automatic ambition ratchet â€” countries must submit economy-wide NDCs covering all sectors including oil & gas by 2026, increasing pressure on GCC states.",
+    summary:"COP30 Belem decision establishes automatic ambition ratchet — countries must submit economy-wide NDCs covering all sectors including oil & gas by 2026, increasing pressure on GCC states.",
     link:"https://unfccc.int/cop30",
     linkLabel:"unfccc.int / COP30 Belem",
-    linkNote:"Decision 1/CMA.7 â€” NDC paragraphs 12â€“15 (economy-wide coverage requirement)",
+    linkNote:"Decision 1/CMA.7 — NDC paragraphs 12–15 (economy-wide coverage requirement)",
     kw:["COP30","NDC","ambition","Belem","economy-wide"]},
-  {id:13,title:"IEA Oil Demand Peak â€” 2029 Revised Forecast",source:"IEA",risk:"High",category:"Narrative",date:daysAgo(16),
-    summary:"IEA revises oil demand peak to 2029 in STEPS scenario, driven by accelerating EV adoption in China and India â€” direct challenge to OPEC+ long-term demand narrative.",
+  {id:13,title:"IEA Oil Demand Peak — 2029 Revised Forecast",source:"IEA",risk:"High",category:"Narrative",date:daysAgo(16),
+    summary:"IEA revises oil demand peak to 2029 in STEPS scenario, driven by accelerating EV adoption in China and India — direct challenge to OPEC+ long-term demand narrative.",
     link:"https://www.iea.org/topics/oil-market",
     linkLabel:"iea.org / Oil Market",
-    linkNote:"Oil 2025 report â€” demand outlook chapter, STEPS vs NZE scenario comparison",
+    linkNote:"Oil 2025 report — demand outlook chapter, STEPS vs NZE scenario comparison",
     kw:["IEA","oil demand","peak","EV","OPEC","2029"]},
-  {id:14,title:"Saudi Arabia NDC 2035 â€” Critically Insufficient Rating",source:"Climate Action Tracker",risk:"Medium",category:"Strategic",date:daysAgo(19),
-    summary:"Climate Action Tracker rates Saudi 2035 NDC as 'Critically Insufficient' â€” creates reputational exposure in multilateral forums ahead of COP31 Global Stocktake review.",
+  {id:14,title:"Saudi Arabia NDC 2035 — Critically Insufficient Rating",source:"Climate Action Tracker",risk:"Medium",category:"Strategic",date:daysAgo(19),
+    summary:"Climate Action Tracker rates Saudi 2035 NDC as 'Critically Insufficient' — creates reputational exposure in multilateral forums ahead of COP31 Global Stocktake review.",
     link:"https://climateactiontracker.org/countries/saudi-arabia/",
     linkLabel:"climateactiontracker.org / Saudi Arabia Profile",
-    linkNote:"Rating section â€” 2035 target vs. Paris-compatible pathways comparison",
+    linkNote:"Rating section — 2035 target vs. Paris-compatible pathways comparison",
     kw:["Saudi Arabia","NDC","insufficient","rating","reputation","COP31"]},
-  {id:15,title:"Carbon Pricing â€” 68 Jurisdictions Now Active",source:"World Bank",risk:"Medium",category:"Policy",date:daysAgo(21),
-    summary:"World Bank State and Trends report: carbon pricing covers 24% of global emissions across 68 jurisdictions â€” escalating competitiveness pressure on non-priced economies including GCC.",
+  {id:15,title:"Carbon Pricing — 68 Jurisdictions Now Active",source:"World Bank",risk:"Medium",category:"Policy",date:daysAgo(21),
+    summary:"World Bank State and Trends report: carbon pricing covers 24% of global emissions across 68 jurisdictions — escalating competitiveness pressure on non-priced economies including GCC.",
     link:"https://carbonpricingdashboard.worldbank.org/",
     linkLabel:"carbonpricingdashboard.worldbank.org",
-    linkNote:"State and Trends 2025 â€” coverage map and jurisdiction expansion table",
+    linkNote:"State and Trends 2025 — coverage map and jurisdiction expansion table",
     kw:["carbon pricing","carbon tax","World Bank","competitiveness","GCC"]},
-  {id:16,title:"Green Hydrogen Certification â€” GCC Strategic Opportunity",source:"IRENA",risk:"Low",category:"Strategic",date:daysAgo(23),
-    summary:"IRENA publishes green hydrogen certification framework positioning GCC solar resources as competitive exporters â€” direct strategic opportunity for Saudi Vision 2030 hydrogen agenda.",
+  {id:16,title:"Green Hydrogen Certification — GCC Strategic Opportunity",source:"IRENA",risk:"Low",category:"Strategic",date:daysAgo(23),
+    summary:"IRENA publishes green hydrogen certification framework positioning GCC solar resources as competitive exporters — direct strategic opportunity for Saudi Vision 2030 hydrogen agenda.",
     link:"https://www.irena.org/Energy-Transition/Technology/Hydrogen",
     linkLabel:"irena.org / Hydrogen Technology",
-    linkNote:"Green hydrogen certification section â€” production cost benchmarks and GCC competitiveness table",
+    linkNote:"Green hydrogen certification section — production cost benchmarks and GCC competitiveness table",
     kw:["hydrogen","IRENA","GCC","green","certification","Vision 2030"]},
-  {id:17,title:"EU Methane Regulation â€” Import Standards for LNG",source:"EU Commission",risk:"High",category:"Policy",date:daysAgo(25),
-    summary:"EU methane regulation sets measurability and reporting standards for imported LNG and pipeline gas â€” Saudi and GCC exporters must comply with OGMP 2.0 or face market access barriers.",
+  {id:17,title:"EU Methane Regulation — Import Standards for LNG",source:"EU Commission",risk:"High",category:"Policy",date:daysAgo(25),
+    summary:"EU methane regulation sets measurability and reporting standards for imported LNG and pipeline gas — Saudi and GCC exporters must comply with OGMP 2.0 or face market access barriers.",
     link:"https://energy.ec.europa.eu/topics/oil-gas-and-coal/methane-emissions_en",
     linkLabel:"energy.ec.europa.eu / Methane Emissions",
-    linkNote:"Import provisions â€” Article 26â€“30 (third country operator obligations)",
+    linkNote:"Import provisions — Article 26–30 (third country operator obligations)",
     kw:["EU","methane","LNG","import","OGMP","market access","GCC"]},
   {id:18,title:"OPEC+ Voluntary Cuts Extended to 2026",source:"OPEC Secretariat",risk:"Low",category:"Strategic",date:daysAgo(27),
-    summary:"OPEC+ extends voluntary production cuts through 2026 â€” provides Saudi Arabia narrative leverage around managed transition and market stability as a counter to phase-out pressure.",
+    summary:"OPEC+ extends voluntary production cuts through 2026 — provides Saudi Arabia narrative leverage around managed transition and market stability as a counter to phase-out pressure.",
     link:"https://www.opec.org/opec_web/en/press_room/7470.htm",
     linkLabel:"opec.org / Press Room",
-    linkNote:"Communique: voluntary adjustments schedule and exit mechanism â€” para. 4â€“7",
+    linkNote:"Communique: voluntary adjustments schedule and exit mechanism — para. 4–7",
     kw:["OPEC","production cuts","Saudi Arabia","market stability","transition"]},
-  {id:19,title:"Just Transition Finance Facility â€” Developing Nations Focus",source:"COP Presidency / UNFCCC",risk:"Medium",category:"Finance",date:daysAgo(29),
-    summary:"New Just Transition Finance Facility prioritizes middle-income fossil fuel economies â€” Saudi Arabia could leverage this for narrative repositioning if it meets eligibility criteria.",
+  {id:19,title:"Just Transition Finance Facility — Developing Nations Focus",source:"COP Presidency / UNFCCC",risk:"Medium",category:"Finance",date:daysAgo(29),
+    summary:"New Just Transition Finance Facility prioritizes middle-income fossil fuel economies — Saudi Arabia could leverage this for narrative repositioning if it meets eligibility criteria.",
     link:"https://unfccc.int/topics/just-transition",
     linkLabel:"unfccc.int / Just Transition",
-    linkNote:"Facility design section â€” eligibility criteria and governance structure",
+    linkNote:"Facility design section — eligibility criteria and governance structure",
     kw:["just transition","finance","fossil fuel","developing","eligibility"]},
-  {id:20,title:"Fossil Fuel Non-Proliferation Treaty â€” 12 New Nations",source:"FF Non-Proliferation Treaty",risk:"Medium",category:"Alliance",date:daysAgo(31),
-    summary:"12 additional nations endorse Fossil Fuel Non-Proliferation Treaty â€” growing coalition could shift UNGA dynamics and create new pressure track outside UNFCCC.",
+  {id:20,title:"Fossil Fuel Non-Proliferation Treaty — 12 New Nations",source:"FF Non-Proliferation Treaty",risk:"Medium",category:"Alliance",date:daysAgo(31),
+    summary:"12 additional nations endorse Fossil Fuel Non-Proliferation Treaty — growing coalition could shift UNGA dynamics and create new pressure track outside UNFCCC.",
     link:"https://fossilfueltreaty.org/",
     linkLabel:"fossilfueltreaty.org / Treaty Portal",
-    linkNote:"Endorsing nations list â€” new signatories section, Pacific Island states bloc",
+    linkNote:"Endorsing nations list — new signatories section, Pacific Island states bloc",
     kw:["fossil fuel treaty","non-proliferation","UNGA","coalition","Pacific"]},
-  {id:21,title:"AOSIS Demand â€” 1.5Â°C Hard Limit in COP31 Text",source:"AOSIS",risk:"High",category:"Negotiation",date:daysAgo(33),
-    summary:"Alliance of Small Island States demands binding 1.5Â°C hard limit language in COP31 final text â€” would constrain remaining carbon budget and accelerate phase-out timelines for oil producers.",
+  {id:21,title:"AOSIS Demand — 1.5°C Hard Limit in COP31 Text",source:"AOSIS",risk:"High",category:"Negotiation",date:daysAgo(33),
+    summary:"Alliance of Small Island States demands binding 1.5°C hard limit language in COP31 final text — would constrain remaining carbon budget and accelerate phase-out timelines for oil producers.",
     link:"https://www.aosis.org/",
     linkLabel:"aosis.org / Small Island States",
-    linkNote:"COP31 negotiating position â€” 1.5Â°C hard limit demand and fossil fuel phase-out linkage",
+    linkNote:"COP31 negotiating position — 1.5°C hard limit demand and fossil fuel phase-out linkage",
     kw:["AOSIS","1.5 degrees","COP31","phase-out","carbon budget","island states"]},
-  {id:22,title:"Carbon Capture Investment â€” Saudi Aramco $7B Commitment",source:"Saudi Aramco",risk:"Low",category:"Strategic",date:daysAgo(36),
-    summary:"Saudi Aramco announces $7B carbon capture and storage investment program â€” provides positive counter-narrative to phase-out pressure and strengthens abatement credibility.",
+  {id:22,title:"Carbon Capture Investment — Saudi Aramco $7B Commitment",source:"Saudi Aramco",risk:"Low",category:"Strategic",date:daysAgo(36),
+    summary:"Saudi Aramco announces $7B carbon capture and storage investment program — provides positive counter-narrative to phase-out pressure and strengthens abatement credibility.",
     link:"https://www.aramco.com/en/sustainability/climate-change",
     linkLabel:"aramco.com / Climate Change & CCS",
-    linkNote:"CCS program section â€” capture targets, project pipeline, and 2035 milestones",
+    linkNote:"CCS program section — capture targets, project pipeline, and 2035 milestones",
     kw:["Aramco","carbon capture","CCS","abatement","Saudi Arabia","investment"]},
-  {id:23,title:"G20 Climate Finance Gap â€” $3.5T Annual Shortfall",source:"G20 / OECD",risk:"Medium",category:"Finance",date:daysAgo(38),
-    summary:"OECD assessment for G20 identifies $3.5T annual climate finance shortfall â€” Arab Development Banks increasingly expected to contribute, creating pressure on GCC sovereign funds.",
+  {id:23,title:"G20 Climate Finance Gap — $3.5T Annual Shortfall",source:"G20 / OECD",risk:"Medium",category:"Finance",date:daysAgo(38),
+    summary:"OECD assessment for G20 identifies $3.5T annual climate finance shortfall — Arab Development Banks increasingly expected to contribute, creating pressure on GCC sovereign funds.",
     link:"https://www.oecd.org/en/topics/climate-finance.html",
     linkLabel:"oecd.org / Climate Finance",
-    linkNote:"G20 Finance Track â€” climate finance gap analysis and mobilisation pathways table",
+    linkNote:"G20 Finance Track — climate finance gap analysis and mobilisation pathways table",
     kw:["G20","OECD","climate finance","gap","sovereign fund","GCC"]},
-  {id:24,title:"Blue Carbon â€” Arab Gulf Mangroves Recognition",source:"IUCN / UNEP",risk:"Low",category:"Strategic",date:daysAgo(40),
-    summary:"IUCN report recognizes Arab Gulf mangrove and seagrass ecosystems as high-value blue carbon sinks â€” Saudi Arabia can leverage for NDC credit and biodiversity diplomacy.",
+  {id:24,title:"Blue Carbon — Arab Gulf Mangroves Recognition",source:"IUCN / UNEP",risk:"Low",category:"Strategic",date:daysAgo(40),
+    summary:"IUCN report recognizes Arab Gulf mangrove and seagrass ecosystems as high-value blue carbon sinks — Saudi Arabia can leverage for NDC credit and biodiversity diplomacy.",
     link:"https://www.iucn.org/resources/issues-brief/blue-carbon",
     linkLabel:"iucn.org / Blue Carbon",
-    linkNote:"Regional assessments â€” Arabian Gulf ecosystem carbon density estimates",
+    linkNote:"Regional assessments — Arabian Gulf ecosystem carbon density estimates",
     kw:["blue carbon","mangroves","GCC","Saudi Arabia","NDC credit","IUCN"]},
-  {id:25,title:"Plastics Treaty â€” Fossil Fuel Production Clause",source:"UNEP INC-5",risk:"Medium",category:"Policy",date:daysAgo(42),
-    summary:"Global plastics treaty negotiations include upstream fossil fuel production reduction clause â€” if adopted, creates new legal pathway to constrain petrochemical feedstock demand affecting Saudi exports.",
+  {id:25,title:"Plastics Treaty — Fossil Fuel Production Clause",source:"UNEP INC-5",risk:"Medium",category:"Policy",date:daysAgo(42),
+    summary:"Global plastics treaty negotiations include upstream fossil fuel production reduction clause — if adopted, creates new legal pathway to constrain petrochemical feedstock demand affecting Saudi exports.",
     link:"https://www.unep.org/inc-plastic-pollution",
     linkLabel:"unep.org / INC Plastic Pollution",
-    linkNote:"INC-5 draft text â€” Article 6 production and consumption caps, feedstock provisions",
+    linkNote:"INC-5 draft text — Article 6 production and consumption caps, feedstock provisions",
     kw:["plastics","petrochemicals","UNEP","treaty","feedstock","Saudi exports"]},
-  {id:26,title:"Nature-Based Solutions â€” Arab Restoration Pledge",source:"IUCN / CBD COP16",risk:"Low",category:"Alliance",date:daysAgo(45),
-    summary:"Arab nations submit joint nature restoration pledge at CBD COP16 â€” creates positive multilateral narrative around Saudi green initiatives including 10 billion tree program.",
+  {id:26,title:"Nature-Based Solutions — Arab Restoration Pledge",source:"IUCN / CBD COP16",risk:"Low",category:"Alliance",date:daysAgo(45),
+    summary:"Arab nations submit joint nature restoration pledge at CBD COP16 — creates positive multilateral narrative around Saudi green initiatives including 10 billion tree program.",
     link:"https://www.cbd.int/cop/cop-16/",
     linkLabel:"cbd.int / COP16 Cali",
-    linkNote:"National pledges section â€” Arab Group restoration commitments and 30x30 alignment",
+    linkNote:"National pledges section — Arab Group restoration commitments and 30x30 alignment",
     kw:["nature","restoration","Arab","CBD","biodiversity","green Saudi"]},
-  {id:27,title:"Shipping Decarbonization â€” IMO 2030 Fuel Standard",source:"IMO",risk:"Medium",category:"Policy",date:daysAgo(47),
-    summary:"IMO adopts 2030 GHG fuel intensity standard for international shipping â€” impacts Saudi Aramco tanker fleet and crude export economics through compliance cost uplift.",
+  {id:27,title:"Shipping Decarbonization — IMO 2030 Fuel Standard",source:"IMO",risk:"Medium",category:"Policy",date:daysAgo(47),
+    summary:"IMO adopts 2030 GHG fuel intensity standard for international shipping — impacts Saudi Aramco tanker fleet and crude export economics through compliance cost uplift.",
     link:"https://www.imo.org/en/MediaCentre/Pages/WhatsNew-1928.aspx",
     linkLabel:"imo.org / GHG Strategy",
-    linkNote:"Revised GHG Strategy â€” medium-term measure, fuel intensity targets table 2030â€“2040",
+    linkNote:"Revised GHG Strategy — medium-term measure, fuel intensity targets table 2030–2040",
     kw:["IMO","shipping","GHG","tanker","Saudi Aramco","fuel standard"]},
-  {id:28,title:"IPCC Synthesis Report â€” 'Now or Never' Language",source:"IPCC",risk:"High",category:"Narrative",date:daysAgo(50),
-    summary:"IPCC Synthesis Report AR6 SPM uses 'now or never' framing for emissions cuts â€” language widely adopted by negotiators and media, eroding space for managed transition arguments.",
+  {id:28,title:"IPCC Synthesis Report — 'Now or Never' Language",source:"IPCC",risk:"High",category:"Narrative",date:daysAgo(50),
+    summary:"IPCC Synthesis Report AR6 SPM uses 'now or never' framing for emissions cuts — language widely adopted by negotiators and media, eroding space for managed transition arguments.",
     link:"https://www.ipcc.ch/report/ar6/syr/",
     linkLabel:"ipcc.ch / AR6 Synthesis Report",
-    linkNote:"Summary for Policymakers â€” Section C.1, 'now or never' emissions reduction window",
+    linkNote:"Summary for Policymakers — Section C.1, 'now or never' emissions reduction window",
     kw:["IPCC","AR6","synthesis","now or never","emissions","framing"]},
-  {id:29,title:"Saudi NEOM â€” Green City Narrative Leverage",source:"NEOM / Vision 2030",risk:"Low",category:"Strategic",date:daysAgo(52),
-    summary:"NEOM green city project generates significant international media coverage as proof point for Saudi sustainability transition â€” valuable narrative asset in climate diplomacy.",
+  {id:29,title:"Saudi NEOM — Green City Narrative Leverage",source:"NEOM / Vision 2030",risk:"Low",category:"Strategic",date:daysAgo(52),
+    summary:"NEOM green city project generates significant international media coverage as proof point for Saudi sustainability transition — valuable narrative asset in climate diplomacy.",
     link:"https://www.neom.com/en-us/regions/theline",
     linkLabel:"neom.com / THE LINE",
-    linkNote:"Sustainability claims section â€” zero carbon operations, renewable energy targets",
+    linkNote:"Sustainability claims section — zero carbon operations, renewable energy targets",
     kw:["NEOM","Saudi Arabia","green city","narrative","diplomacy","Vision 2030"]},
-  {id:30,title:"Just Energy Transition Partnerships â€” GCC Exclusion Risk",source:"G7 / COP Presidency",risk:"Medium",category:"Alliance",date:daysAgo(55),
-    summary:"Just Energy Transition Partnerships (JETPs) expanded to 10 countries â€” GCC nations systematically excluded due to high-income classification, removing potential pathway to managed transition support.",
+  {id:30,title:"Just Energy Transition Partnerships — GCC Exclusion Risk",source:"G7 / COP Presidency",risk:"Medium",category:"Alliance",date:daysAgo(55),
+    summary:"Just Energy Transition Partnerships (JETPs) expanded to 10 countries — GCC nations systematically excluded due to high-income classification, removing potential pathway to managed transition support.",
     link:"https://unfccc.int/topics/just-transition",
     linkLabel:"unfccc.int / Just Transition Partnerships",
-    linkNote:"JETP country list and eligibility criteria â€” high-income exclusion provision",
+    linkNote:"JETP country list and eligibility criteria — high-income exclusion provision",
     kw:["JETP","just transition","GCC","exclusion","G7","managed transition"]},
 ];
 const TRENDS=[
@@ -238,10 +238,10 @@ const RB=r=>r==="High"?"rgba(255,60,60,0.12)":r==="Medium"?"rgba(255,180,0,0.12)
 const FF="'IBM Plex Mono',monospace";
 const STATS={totalScanned:1284};
 
-/* â”€â”€â”€ RADAR â”€â”€â”€ */
-// Converts filtered alert list â†’ stable blip positions using golden-angle spread
+/* ─── RADAR ─── */
+// Converts filtered alert list &#8594; stable blip positions using golden-angle spread
 const alertsToBlips=(alerts)=>{
-  const GA=2.39996; // golden angle in radians â€” avoids clustering
+  const GA=2.39996; // golden angle in radians — avoids clustering
   const riskR={High:.35,Medium:.62,Low:.82}; // inner=dangerous, outer=low
   return alerts.map((a,i)=>({
     a:(i*GA)%(Math.PI*2),
@@ -322,7 +322,7 @@ const Radar=({size=290,alerts=[]})=>{
   return <canvas ref={ref} width={size} height={size} style={{borderRadius:"50%",display:"block"}}/>;
 };
 
-/* â”€â”€â”€ PDF â”€â”€â”€ */
+/* ─── PDF ─── */
 const makePDF=(alerts,keywords)=>{
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
@@ -344,7 +344,7 @@ const makePDF=(alerts,keywords)=>{
 
   if(keywords.length){
     doc.setFontSize(9);doc.setTextColor(0,200,120);doc.setFont("helvetica","bold");
-    doc.text("ACTIVE KEYWORD WATCH: "+keywords.join(" Â· "),14,y);y+=10;
+    doc.text("ACTIVE KEYWORD WATCH: "+keywords.join(" · "),14,y);y+=10;
   }
 
   // stats
@@ -386,14 +386,14 @@ const makePDF=(alerts,keywords)=>{
 
   // Footer red line
   doc.setDrawColor(200,30,30);doc.setLineWidth(.6);doc.line(14,279,W-14,279);
-  // Footer text â€” bold red
+  // Footer text — bold red
   doc.setFontSize(8.5);doc.setTextColor(210,30,30);doc.setFont("helvetica","bold");
   doc.text("Strategic Intelligence | Naif Alsalem",14,284);
   doc.text("CONFIDENTIAL",W-32,284);
   doc.save("ClimateRadar_"+new Date().toISOString().slice(0,10)+".pdf");
 };
 
-/* â”€â”€â”€ APP â”€â”€â”€ */
+/* ─── APP ─── */
 function App(){
   const [alerts,setAlerts]=useState(ALL_ALERTS);
   const [filter,setFilter]=useState("All");
@@ -431,7 +431,7 @@ function App(){
     try{
       await fetch(url,{method:"HEAD",mode:"no-cors",signal:controller.signal,cache:"no-store"});
       clearTimeout(timer);
-      // no-cors gives opaque response â€” domain is reachable
+      // no-cors gives opaque response — domain is reachable
       setLinkStatus(s=>({...s,[alertId]:"ok"}));
     }catch(e){
       clearTimeout(timer);
@@ -468,7 +468,7 @@ function App(){
     if(tab==="strategic") setTab("alerts");
   };
 
-  // â”€â”€ RSS FEED SOURCES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── RSS FEED SOURCES ────────────────────────────────────────
   const RSS_SOURCES=[
     {name:"UNFCCC",url:"https://unfccc.int/news/feed",category:"Negotiation",baseRisk:"High"},
     {name:"IEA",url:"https://www.iea.org/rss/news.xml",category:"Narrative",baseRisk:"Medium"},
@@ -476,7 +476,7 @@ function App(){
     {name:"EU Climate",url:"https://ec.europa.eu/commission/presscorner/api/rss?institution=COM&theme=CLIMA",category:"Policy",baseRisk:"Medium"},
     {name:"UN Environment",url:"https://www.unep.org/rss.xml",category:"Narrative",baseRisk:"Medium"},
   ];
-  // rss2json proxy â€” free, no key needed
+  // rss2json proxy — free, no key needed
   const RSS2JSON="https://api.rss2json.com/v1/api.json?rss_url=";
 
   // Auto-classify risk from title/description text
@@ -536,13 +536,13 @@ function App(){
               summary:desc||title,
               link:item.link||item.guid||"#",
               linkLabel:`${src.name} / ${title.slice(0,40)}...`,
-              linkNote:"Live feed â€” fetched "+new Date().toLocaleDateString("en-GB"),
+              linkNote:"Live feed — fetched "+new Date().toLocaleDateString("en-GB"),
               kw:extractKw(combined),
             });
           });
         }
       }catch(e){
-        // Source failed â€” skip silently
+        // Source failed — skip silently
       }
     }
 
@@ -593,7 +593,7 @@ function App(){
     {/* HEADER */}
     <div style={{background:"rgba(2,10,16,.98)",borderBottom:"1px solid rgba(0,200,120,.2)",padding:"12px 28px",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:10,flexShrink:0}}>
       <div>
-        <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:28,fontWeight:900,letterSpacing:4,color:"#00e87a",textShadow:"0 0 28px rgba(0,232,122,.55)",lineHeight:1.1}}>â—ˆ CLIMATE RADAR</div>
+        <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:28,fontWeight:900,letterSpacing:4,color:"#00e87a",textShadow:"0 0 28px rgba(0,232,122,.55)",lineHeight:1.1}}>&#9672; CLIMATE RADAR</div>
         <div style={{fontSize:14,color:"rgba(0,210,120,.6)",letterSpacing:3,marginTop:3,fontWeight:600}}>STRATEGIC INTELLIGENCE</div>
         <div style={{fontSize:12,color:"rgba(0,210,130,.5)",letterSpacing:2,marginTop:3,fontFamily:"'Orbitron',sans-serif"}}>Naif Alsalem</div>
       </div>
@@ -609,7 +609,7 @@ function App(){
     {/* BODY */}
     <div style={{flex:1,display:"flex",overflow:"hidden",position:"relative",zIndex:1}}>
 
-      {/* â”€â”€ LEFT: THREAT MATRIX + TRENDS â”€â”€ */}
+      {/* ── LEFT: THREAT MATRIX + TRENDS ── */}
       <div style={{width:220,flexShrink:0,borderRight:"1px solid rgba(0,200,120,.1)",display:"flex",flexDirection:"column",background:"rgba(0,8,5,.8)",overflowY:"auto"}}>
 
         {/* THREAT MATRIX */}
@@ -630,7 +630,7 @@ function App(){
             <div key={i} style={{marginBottom:14}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <span style={{fontSize:10,color:"rgba(200,230,210,.65)"}}>{n.label}</span>
-                <span style={{fontSize:10,color:RC(n.risk),fontWeight:600}}>{n.dir==="up"?"â–²":"â–¼"} {n.trend}</span>
+                <span style={{fontSize:10,color:RC(n.risk),fontWeight:600}}>{n.dir==="up"?"&#9650;":"&#9660;"} {n.trend}</span>
               </div>
               <div style={{height:3,background:"rgba(0,200,120,.07)",borderRadius:2}}>
                 <div style={{height:"100%",width:`${Math.abs(parseInt(n.trend))}%`,background:RC(n.risk),borderRadius:2,boxShadow:`0 0 5px ${RC(n.risk)}70`}}/>
@@ -640,7 +640,7 @@ function App(){
         </div>
       </div>
 
-      {/* â”€â”€ CENTER: RADAR HERO â”€â”€ */}
+      {/* ── CENTER: RADAR HERO ── */}
       <div style={{width:400,flexShrink:0,borderRight:"1px solid rgba(0,200,120,.1)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center,rgba(0,50,25,.5) 0%,rgba(0,8,5,.9) 70%)",position:"relative",overflow:"hidden"}}>
 
         {/* Decorative rings behind radar */}
@@ -659,13 +659,13 @@ function App(){
               SIGNAL{filtered.length!==1?"S":""} ON RADAR
             </div>
             <div style={{fontSize:8,letterSpacing:2,color:"rgba(0,200,120,.28)",marginTop:2}}>
-              {sourcesScanned.toLocaleString()} SOURCES SCANNED{scanCount>0?` Â· RUN #${scanCount+1}`:""}
+              {sourcesScanned.toLocaleString()} SOURCES SCANNED{scanCount>0?` · RUN #${scanCount+1}`:""}
             </div>
             {scanCount>0&&<div style={{marginTop:5,padding:"2px 10px",fontSize:8,letterSpacing:2,
               background:isLive?"rgba(0,200,120,.12)":"rgba(255,180,0,.1)",
               border:`1px solid ${isLive?"rgba(0,200,120,.3)":"rgba(255,180,0,.3)"}`,
               color:isLive?"#00c878":"#ffb400",borderRadius:8}}>
-              {isLive?"â— LIVE DATA":"â—Ž CACHED DATA"}
+              {isLive?"&#9679; LIVE DATA":"&#9678; CACHED DATA"}
             </div>}
           </div>
 
@@ -676,7 +676,7 @@ function App(){
               border:"1px solid rgba(0,200,120,.35)",color:scanning?"rgba(0,200,120,.45)":"#00e87a",
               borderRadius:2,width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:9,
               cursor:scanning?"not-allowed":"pointer",boxShadow:scanning?"none":"0 0 20px rgba(0,200,120,.08)"}}>
-            {scanning?<><span className="spin">âŸ³</span>{scanMsg}</>:<><span style={{fontSize:16}}>âŸ³</span> RUN NEW SCAN</>}
+            {scanning?<><span className="spin">&#8635;</span>{scanMsg}</>:<><span style={{fontSize:16}}>&#8635;</span> RUN NEW SCAN</>}
           </button>
 
           {/* Risk legend */}
@@ -704,8 +704,8 @@ function App(){
                 onChange={e=>handleSearch(e.target.value)}
                 placeholder="Search intelligence feed..."
                 style={{width:"100%",background:"rgba(0,35,22,.5)",border:"1px solid rgba(0,200,120,.18)",borderRadius:2,padding:"8px 32px 8px 32px",color:"#c8e6d4",fontSize:13,fontFamily:FF,transition:"border .2s"}}/>
-              <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"rgba(0,200,120,.45)",fontSize:15,pointerEvents:"none"}}>âŒ•</span>
-              {search&&<span onClick={()=>setSearch("")} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",color:"rgba(0,200,120,.5)",fontSize:13,cursor:"pointer",lineHeight:1}}>âœ•</span>}
+              <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"rgba(0,200,120,.45)",fontSize:15,pointerEvents:"none"}}>&#8981;</span>
+              {search&&<span onClick={()=>setSearch("")} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",color:"rgba(0,200,120,.5)",fontSize:13,cursor:"pointer",lineHeight:1}}>&#10005;</span>}
             </div>
             <button className="btn-green" onClick={()=>setRecentOnly(r=>!r)}
               style={{padding:"9px 14px",fontSize:11,letterSpacing:1.5,fontWeight:600,
@@ -713,11 +713,11 @@ function App(){
                 border:`1px solid ${recentOnly?"#00e87a":"rgba(0,200,120,.25)"}`,
                 color:recentOnly?"#00e87a":"rgba(0,200,120,.5)",
                 borderRadius:2,fontFamily:FF,whiteSpace:"nowrap",flexShrink:0}}>
-              {recentOnly?"â—‰ RECENT":"â—Ž ALL TIME"}
+              {recentOnly?"&#9673; RECENT":"&#9678; ALL TIME"}
             </button>
             <button className="btn-green" onClick={()=>makePDF(filtered,keywords)}
               style={{padding:"9px 20px",fontSize:12,letterSpacing:1.5,fontWeight:600,background:"rgba(255,80,80,.1)",border:"1px solid rgba(255,80,80,.35)",color:"#ff8080",borderRadius:2,fontFamily:FF,display:"flex",alignItems:"center",gap:6,whiteSpace:"nowrap"}}>
-              â¬‡&nbsp;PDF
+              &#11015;&nbsp;PDF
             </button>
           </div>
           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
@@ -733,12 +733,12 @@ function App(){
         {/* KEYWORD WATCH BAR */}
         <div style={{padding:"10px 20px",borderBottom:"1px solid rgba(0,200,120,.1)",background:"rgba(0,5,3,.55)",flexShrink:0}}>
           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-            <span style={{fontSize:10,letterSpacing:2,color:"rgba(0,200,120,.5)",flexShrink:0}}>â¬¡ KEYWORD WATCH:</span>
+            <span style={{fontSize:10,letterSpacing:2,color:"rgba(0,200,120,.5)",flexShrink:0}}>&#11041; KEYWORD WATCH:</span>
             <div style={{display:"flex",gap:5,flexWrap:"wrap",flex:1,alignItems:"center"}}>
               {keywords.map(kw=>(
                 <span key={kw} style={{padding:"3px 10px",fontSize:11,background:"rgba(0,180,100,.12)",border:"1px solid rgba(0,180,100,.25)",color:"#00c878",borderRadius:10,display:"inline-flex",alignItems:"center",gap:5}}>
                   {kw}
-                  <span onClick={()=>setKeywords(keywords.filter(k=>k!==kw))} style={{cursor:"pointer",color:"rgba(0,200,120,.5)",fontSize:12}}>âœ•</span>
+                  <span onClick={()=>setKeywords(keywords.filter(k=>k!==kw))} style={{cursor:"pointer",color:"rgba(0,200,120,.5)",fontSize:12}}>&#10005;</span>
                 </span>
               ))}
               <input value={newKw} onChange={e=>setNewKw(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addKw()}
@@ -747,7 +747,7 @@ function App(){
             </div>
             <button className="btn-green" onClick={scanKw}
               style={{padding:"6px 16px",fontSize:11,letterSpacing:1.5,background:"rgba(0,200,120,.1)",border:"1px solid rgba(0,200,120,.3)",color:"#00e87a",borderRadius:2,fontFamily:FF,flexShrink:0,fontWeight:600}}>
-              âŒ• SCAN
+              &#8981; SCAN
             </button>
           </div>
         </div>
@@ -765,7 +765,7 @@ function App(){
         {/* CONTENT */}
         <div style={{flex:1,overflowY:"auto",padding:"14px 20px",display:"flex",gap:14}}>
 
-          {/* â”€â”€ ALERTS â”€â”€ */}
+          {/* ── ALERTS ── */}
           {tab==="alerts"&&<>
             <div style={{flex:1}}>
               {filtered.length===0&&<div style={{textAlign:"center",color:"rgba(0,200,120,.3)",marginTop:60,fontSize:13,letterSpacing:2}}>NO SIGNALS DETECTED</div>}
@@ -782,7 +782,7 @@ function App(){
                   </div>
                   <div style={{fontSize:12,color:"rgba(200,230,210,.55)",lineHeight:1.75}}>{a.summary}</div>
                   <div style={{marginTop:8,display:"flex",justifyContent:"space-between"}}>
-                    <span style={{fontSize:11,color:"rgba(0,200,120,.4)",letterSpacing:1}}>â—† {a.source}</span>
+                    <span style={{fontSize:11,color:"rgba(0,200,120,.4)",letterSpacing:1}}>&#9670; {a.source}</span>
                     <span style={{fontSize:11,color:"rgba(0,200,120,.28)"}}>{a.date}</span>
                   </div>
                 </div>
@@ -793,7 +793,7 @@ function App(){
                 <div style={{fontSize:9,letterSpacing:3,color:"rgba(0,200,120,.38)",marginBottom:12}}>SIGNAL DETAIL</div>
                 <div style={{fontSize:13,color:"#e0f0e8",fontWeight:600,marginBottom:10,lineHeight:1.6}}>{sel.title}</div>
                 <div style={{padding:"8px 10px",marginBottom:12,background:RB(sel.risk),border:`1px solid ${RC(sel.risk)}30`,borderRadius:1}}>
-                  <span style={{fontSize:10,letterSpacing:2,color:RC(sel.risk),fontWeight:600}}>â— RISK: {sel.risk.toUpperCase()}</span>
+                  <span style={{fontSize:10,letterSpacing:2,color:RC(sel.risk),fontWeight:600}}>&#9679; RISK: {sel.risk.toUpperCase()}</span>
                 </div>
                 <div style={{fontSize:12,color:"rgba(200,230,210,.7)",lineHeight:1.8,marginBottom:12}}>{sel.summary}</div>
                 <div style={{borderTop:"1px solid rgba(0,200,120,.1)",paddingTop:10,marginBottom:12}}>
@@ -807,7 +807,7 @@ function App(){
                 {/* Link Verification Block */}
                 {(()=>{
                   const st=linkStatus[sel.id];
-                  const stIcon=st==="checking"?"âŸ³":st==="ok"?"âœ“":st==="fail"?"âœ—":st==="timeout"?"âš ":"âŒ•";
+                  const stIcon=st==="checking"?"&#8635;":st==="ok"?"&#10003;":st==="fail"?"&#10007;":st==="timeout"?"&#9888;":"&#8981;";
                   const stLabel=st==="checking"?"VERIFYING...":st==="ok"?"LINK VERIFIED":st==="fail"?"LINK UNREACHABLE":st==="timeout"?"TIMED OUT":"NOT CHECKED";
                   const stColor=st==="ok"?"#00c878":st==="fail"?"#ff3c3c":st==="timeout"?"#ffb400":st==="checking"?"#ffb400":"rgba(0,200,120,.4)";
                   return(
@@ -826,35 +826,35 @@ function App(){
                       {/* Link */}
                       <a href={sel.link} target="_blank" rel="noopener noreferrer" style={{display:"block",textDecoration:"none"}}>
                         <div style={{padding:"8px 10px",background:"rgba(0,200,120,.07)",border:`1px solid rgba(0,200,120,.22)`,borderBottom:"none"}}>
-                          <div style={{fontSize:9,color:"rgba(0,200,120,.5)",letterSpacing:1,marginBottom:3}}>â†’ VIEW SOURCE</div>
+                          <div style={{fontSize:9,color:"rgba(0,200,120,.5)",letterSpacing:1,marginBottom:3}}>&#8594; VIEW SOURCE</div>
                           <div style={{fontSize:10,color:"#00c878",fontWeight:600}}>{sel.linkLabel}</div>
                         </div>
                       </a>
                       {/* Section note */}
                       <div style={{padding:"7px 10px",background:"rgba(0,80,45,.08)",border:"1px solid rgba(0,200,120,.14)",borderRadius:"0 0 1px 1px"}}>
-                        <div style={{fontSize:9,color:"rgba(0,200,120,.5)",lineHeight:1.5}}>ðŸ“ {sel.linkNote}</div>
+                        <div style={{fontSize:9,color:"rgba(0,200,120,.5)",lineHeight:1.5}}>&#128205; {sel.linkNote}</div>
                       </div>
                       {st==="ok"&&<div style={{fontSize:8,color:"rgba(0,200,120,.35)",marginTop:3,letterSpacing:.5}}>* Domain reachable via HEAD check. Exact page availability may vary due to CORS policy.</div>}
                       {st==="fail"&&<div style={{fontSize:8,color:"rgba(255,60,60,.5)",marginTop:3,letterSpacing:.5}}>* Domain unreachable. Link may be broken or blocked.</div>}
                     </div>
                   );
                 })()}
-                <button onClick={()=>setSel(null)} style={{display:"block",width:"100%",padding:"7px",fontSize:10,letterSpacing:2,background:"transparent",border:"1px solid rgba(0,200,120,.1)",color:"rgba(0,200,120,.38)",cursor:"pointer",fontFamily:FF,borderRadius:1}}>âœ• CLOSE</button>
+                <button onClick={()=>setSel(null)} style={{display:"block",width:"100%",padding:"7px",fontSize:10,letterSpacing:2,background:"transparent",border:"1px solid rgba(0,200,120,.1)",color:"rgba(0,200,120,.38)",cursor:"pointer",fontFamily:FF,borderRadius:1}}>&#10005; CLOSE</button>
               </div>
             )}
           </>}
 
-          {/* â”€â”€ KEYWORD RESULTS â”€â”€ */}
+          {/* ── KEYWORD RESULTS ── */}
           {tab==="keywords"&&(
             <div style={{flex:1}}>
               <div style={{fontSize:10,letterSpacing:3,color:"rgba(0,200,120,.4)",marginBottom:14}}>
-                KEYWORD SCAN RESULTS â€” {filteredKw.length} SIGNAL{filteredKw.length!==1?"S":""} MATCHED{search?` Â· filtered by "${search}"`:""}
+                KEYWORD SCAN RESULTS — {filteredKw.length} SIGNAL{filteredKw.length!==1?"S":""} MATCHED{search?` · filtered by "${search}"`:""}
               </div>
               <div style={{marginBottom:14,padding:"10px 14px",background:"rgba(0,18,10,.55)",border:"1px solid rgba(0,200,120,.12)",borderRadius:2,fontSize:12,color:"rgba(0,200,120,.6)",display:"flex",flexWrap:"wrap",gap:6,alignItems:"center"}}>
                 <span style={{color:"rgba(0,200,120,.45)"}}>Watching:</span>
                 {keywords.map(kw=><span key={kw} style={{padding:"2px 9px",background:"rgba(0,180,100,.12)",border:"1px solid rgba(0,180,100,.22)",color:"#00c878",borderRadius:8,fontSize:11}}>{kw}</span>)}
               </div>
-              {filteredKw.length===0&&<div style={{textAlign:"center",color:"rgba(0,200,120,.3)",marginTop:50,fontSize:13,letterSpacing:2}}>{search?"NO MATCHES FOR SEARCH QUERY":"NO MATCHES â€” ADD MORE KEYWORDS"}</div>}
+              {filteredKw.length===0&&<div style={{textAlign:"center",color:"rgba(0,200,120,.3)",marginTop:50,fontSize:13,letterSpacing:2}}>{search?"NO MATCHES FOR SEARCH QUERY":"NO MATCHES — ADD MORE KEYWORDS"}</div>}
               {filteredKw.map((a,i)=>{
                 const matched=keywords.filter(kw=>a.title.toLowerCase().includes(kw.toLowerCase())||a.summary.toLowerCase().includes(kw.toLowerCase())||a.kw.some(ak=>ak.toLowerCase().includes(kw.toLowerCase())));
                 return(
@@ -875,15 +875,15 @@ function App(){
             </div>
           )}
 
-          {/* â”€â”€ STRATEGIC â”€â”€ */}
+          {/* ── STRATEGIC ── */}
           {tab==="strategic"&&(
             <div style={{flex:1}}>
               <div style={{fontSize:10,letterSpacing:3,color:"rgba(0,200,120,.4)",marginBottom:16}}>
-                STRATEGIC INTELLIGENCE BRIEF â€” {new Date().toDateString().toUpperCase()}
+                STRATEGIC INTELLIGENCE BRIEF — {new Date().toDateString().toUpperCase()}
               </div>
               {[
                 {t:"Critical Risk Summary",r:"High",c:"Three high-risk signals detected this cycle. The convergence of IPCC AR7 binding language, EU CBAM expansion, and UNFCCC GST ambiguous text creates a compounding threat vector requiring immediate narrative counter-strategy deployment."},
-                {t:"Narrative Vulnerability Assessment",r:"High",c:'"Phase-out" language has surged +18% across monitored sources. CBAM references are up +31% â€” the highest velocity indicator this period. Arab delegations should prepare counter-framing around energy security and just transition.'},
+                {t:"Narrative Vulnerability Assessment",r:"High",c:'"Phase-out" language has surged +18% across monitored sources. CBAM references are up +31% — the highest velocity indicator this period. Arab delegations should prepare counter-framing around energy security and just transition.'},
                 {t:"Coalition Opportunity",r:"Low",c:"African nations' new climate debt coalition aligns closely with Arab Group positions on historical responsibility. A coordinated outreach initiative could expand the bloc's influence ahead of COP31."},
                 {t:"Recommended Strategic Actions",r:"Medium",c:"1. Activate diplomatic channels with IPCC bureau contacts regarding AR7 language precision.\n2. Prepare technical rebuttal to IEA Net Zero 2035 demand scenario.\n3. Commission independent equity metric analysis to counter CBAM expansion.\n4. Establish pre-COP31 dialogue with African coalition lead delegations."}
               ].map((s,i)=>(
