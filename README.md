@@ -9,7 +9,8 @@
 **Climate Radar** is a browser-based strategic intelligence dashboard purpose-built for monitoring, analyzing, and reporting on global climate negotiation signals in real time. It surfaces risks, narrative shifts, and coalition opportunities relevant to Arab Group and Saudi negotiating positions across major international climate bodies.
 
 The platform requires no server, no installation, and no build step — it runs entirely as a single self-contained HTML file with PIN-protected access.
-<img width="1900" height="840" alt="image" src="https://github.com/user-attachments/assets/487196a8-5594-4e4e-9a2b-a6ef9c79b6ff" />
+<img width="1913" height="854" alt="image" src="https://github.com/user-attachments/assets/cc1972ab-c421-433f-bd7f-245c8b946b9f" />
+
 
 ---
 
