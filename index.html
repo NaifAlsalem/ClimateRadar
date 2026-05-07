@@ -104,17 +104,34 @@ const computeTrends=(curr,prev)=>TREND_CFG.map(t=>{
 }).sort((a,b)=>b.pct-a.pct);
 
 /* RSS SOURCES */
+// Climate intelligence RSS sources — news + official bodies
 const RSS_SOURCES=[
+  // High-quality climate journalism
   {name:'Carbon Brief',     url:'https://www.carbonbrief.org/feed/',                                            cat:'Narrative',   risk:'High'},
   {name:'Climate Home',     url:'https://www.climatechangenews.com/feed/',                                      cat:'Negotiation', risk:'High'},
   {name:'Guardian Climate', url:'https://www.theguardian.com/environment/climate-crisis/rss',                   cat:'Narrative',   risk:'Medium'},
-  {name:'BBC Environment',  url:'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',                cat:'Narrative',   risk:'Medium'},
-  {name:'UN Climate News',  url:'https://news.un.org/feed/subscribe/en/news/topic/climate-change/feed/rss.xml', cat:'Negotiation', risk:'High'},
-  {name:'Yale E360',        url:'https://e360.yale.edu/feed',                                                   cat:'Narrative',   risk:'Medium'},
   {name:'DeSmog',           url:'https://www.desmog.com/feed/',                                                 cat:'Narrative',   risk:'High'},
+  {name:'Yale E360',        url:'https://e360.yale.edu/feed',                                                   cat:'Narrative',   risk:'Medium'},
+  // Official bodies
+  {name:'UN Climate News',  url:'https://news.un.org/feed/subscribe/en/news/topic/climate-change/feed/rss.xml', cat:'Negotiation', risk:'High'},
+  {name:'UNFCCC News',      url:'https://unfccc.int/news/feed',                                                 cat:'Negotiation', risk:'High'},
+  {name:'IPCC News',        url:'https://www.ipcc.ch/feed/',                                                    cat:'Narrative',   risk:'High'},
+  // Policy / trade
+  {name:'EU Climate',       url:'https://climate.ec.europa.eu/news-and-events/news_en.rss',                    cat:'Policy',      risk:'High'},
   {name:'Reuters Env',      url:'https://feeds.reuters.com/reuters/environment',                                cat:'Policy',      risk:'Medium'},
-  {name:'CleanTechnica',    url:'https://cleantechnica.com/feed/',                                              cat:'Strategic',   risk:'Low'},
+  {name:'BBC Environment',  url:'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',                cat:'Narrative',   risk:'Medium'},
   {name:'E&E News',         url:'https://www.eenews.net/rss/feed',                                             cat:'Policy',      risk:'High'},
+];
+
+// UNFCCC and IPCC official decision databases for deep lookup
+const OFFICIAL_DOCS=[
+  {name:'UNFCCC Decisions',    url:'https://unfccc.int/decisions',          desc:'All COP and CMA decisions since 1995'},
+  {name:'UNFCCC GST',          url:'https://unfccc.int/topics/global-stocktake', desc:'Global Stocktake documents and outcomes'},
+  {name:'UNFCCC NDC Registry',  url:'https://unfccc.int/NDCREG',            desc:'National Determined Contributions registry'},
+  {name:'UNFCCC Article 6',     url:'https://unfccc.int/process-and-meetings/the-paris-agreement/the-glasgow-climate-pact/cop26-outcomes-market-mechanisms-and-non-market-approaches-article-6', desc:'Carbon market mechanism decisions'},
+  {name:'IPCC AR6 Full Report', url:'https://www.ipcc.ch/report/ar6/syr/', desc:'Sixth Assessment Synthesis Report'},
+  {name:'IPCC AR7 Status',      url:'https://www.ipcc.ch/assessment-report/ar7/', desc:'Seventh Assessment Report in progress'},
+  {name:'IPCC SR1.5',           url:'https://www.ipcc.ch/sr15/',            desc:'Special Report on 1.5C — key phase-out language source'},
 ];
 
 // Curated fallback signals — used when all live proxies fail
@@ -337,7 +354,7 @@ function App(){
   const[scanCount,setScanCount]=useState(0);
   const[totalFetched,setTotalFetched]=useState(0);
   const[isLive,setIsLive]=useState(false);
-  const[lastScan,setLastScan]=useState('--');
+  const[lastScan,setLastScan]=useState(()=>{const n=new Date();return n.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' GST';});
   const[keywords,setKeywords]=useState(['fossil fuel','CBAM','phase-out']);
   const[newKw,setNewKw]=useState('');
   const[kwResults,setKwResults]=useState([]);
@@ -379,18 +396,23 @@ function App(){
           const pubDate=item.pubDate
             ?new Date(item.pubDate).toISOString().slice(0,10)
             :new Date().toISOString().slice(0,10);
-          live.push({
-            id:i*10000+idx+Math.floor(Math.random()*1000),
-            title,source:src.name,
-            risk:autoRisk(combined),
-            category:autoCat(combined,src.cat),
-            date:pubDate,
-            summary:desc||title,
-            link:item.link||'#',
-            linkLabel:src.name,
-            linkNote:'Live feed - fetched '+new Date().toLocaleDateString('en-GB'),
-            kw:autoKw(combined),
-          });
+          // Only include signals from the last 30 days
+          const signalDate=new Date(pubDate);
+          const cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+          if(signalDate>=cutoff){
+            live.push({
+              id:i*10000+idx+Math.floor(Math.random()*1000),
+              title,source:src.name,
+              risk:autoRisk(combined),
+              category:autoCat(combined,src.cat),
+              date:pubDate,
+              summary:desc||title,
+              link:item.link||'#',
+              linkLabel:src.name,
+              linkNote:'Live feed - fetched '+new Date().toLocaleDateString('en-GB'),
+              kw:autoKw(combined),
+            });
+          }
         });
       }catch(e){}
     }
@@ -466,17 +488,25 @@ function App(){
     <div style={{position:'fixed',inset:0,background:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px)',pointerEvents:'none',zIndex:0}}/>
 
     {/* HEADER */}
-    <div style={{background:'rgba(1,8,7,.97)',borderBottom:'1px solid rgba(0,200,120,.18)',padding:'10px 24px',display:'flex',alignItems:'flex-end',justifyContent:'space-between',flexShrink:0,zIndex:10}}>
+    <div style={{background:'rgba(1,8,7,.97)',borderBottom:'1px solid rgba(0,200,120,.18)',padding:'10px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0,zIndex:10}}>
       <div>
         <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:26,fontWeight:900,letterSpacing:4,color:'#00e87a',textShadow:'0 0 24px rgba(0,232,122,.5)',lineHeight:1.1}}>CLIMATE RADAR</div>
         <div style={{fontSize:13,color:'rgba(0,210,120,.55)',letterSpacing:3,marginTop:2}}>STRATEGIC INTELLIGENCE</div>
-        <div style={{fontSize:11,color:'rgba(0,180,100,.42)',letterSpacing:2,marginTop:1}}>Naif Alsalem</div>
+        <a href='https://github.com/NaifAlsalem/ClimateRadar' target='_blank' rel='noopener noreferrer'
+          style={{fontSize:12,color:'rgba(0,230,130,.75)',letterSpacing:2,marginTop:4,fontWeight:700,textDecoration:'none',display:'inline-block',borderBottom:'1px solid rgba(0,200,120,.3)',paddingBottom:1}}>
+          Naif Alsalem
+        </a>
       </div>
-      <div style={{display:'flex',alignItems:'center',gap:18}}>
-        <div style={{fontSize:9,color:'rgba(0,200,120,.36)',letterSpacing:1,textAlign:'right'}}>{lastScan}</div>
-        <div style={{display:'flex',alignItems:'center',gap:6,borderLeft:'1px solid rgba(0,200,120,.15)',paddingLeft:16}}>
-          <div className="blink" style={{width:7,height:7,borderRadius:'50%',background:'#00e87a',boxShadow:'0 0 7px #00e87a'}}/>
-          <span style={{fontSize:9,color:'#00e87a',letterSpacing:2}}>LIVE</span>
+      <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:8}}>
+        <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:18,fontWeight:900,letterSpacing:3,color:'rgba(0,255,160,.7)',textShadow:'0 0 16px rgba(0,255,160,.35)'}}>
+          NEGOTIATION RAPID SUPPORT
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:18,marginTop:6}}>
+          <div style={{fontSize:12,color:'rgba(0,200,120,.75)',letterSpacing:1.5,textAlign:'right',fontWeight:700}}>{lastScan}</div>
+          <div style={{display:'flex',alignItems:'center',gap:6,borderLeft:'1px solid rgba(0,200,120,.15)',paddingLeft:16}}>
+            <div className="blink" style={{width:7,height:7,borderRadius:'50%',background:'#00e87a',boxShadow:'0 0 7px #00e87a'}}/>
+            <span style={{fontSize:9,color:'#00e87a',letterSpacing:2}}>LIVE</span>
+          </div>
         </div>
       </div>
     </div>
@@ -758,6 +788,23 @@ function App(){
                   <div style={{fontSize:11,color:'rgba(180,220,200,.7)',lineHeight:1.85,whiteSpace:'pre-line'}}>{s.c}</div>
                 </div>
               ))}
+              {/* OFFICIAL DOCUMENTS REFERENCE PANEL */}
+              <div style={{marginTop:16,padding:'14px 16px',background:'rgba(0,8,5,.7)',border:'1px solid rgba(0,200,120,.15)',borderLeft:'3px solid rgba(0,200,120,.4)',borderRadius:1}}>
+                <div style={{fontSize:11,color:'#00e87a',fontWeight:700,marginBottom:10}}>OFFICIAL DECISION DATABASES</div>
+                <div style={{fontSize:9,color:'rgba(0,200,120,.45)',marginBottom:12,letterSpacing:1}}>Direct links to UNFCCC decisions, IPCC reports, and NDC registry for primary source verification</div>
+                {OFFICIAL_DOCS.map((d,i)=>(
+                  <a key={i} href={d.url} target='_blank' rel='noopener noreferrer'
+                    style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',padding:'8px 10px',marginBottom:5,background:'rgba(0,200,120,.04)',border:'1px solid rgba(0,200,120,.1)',borderRadius:1,textDecoration:'none',transition:'background .15s'}}
+                    onMouseOver={e=>e.currentTarget.style.background='rgba(0,200,120,.09)'}
+                    onMouseOut={e=>e.currentTarget.style.background='rgba(0,200,120,.04)'}>
+                    <div>
+                      <div style={{fontSize:10,color:'#00c878',fontWeight:600,marginBottom:2}}>{d.name}</div>
+                      <div style={{fontSize:9,color:'rgba(0,200,120,.45)'}}>{d.desc}</div>
+                    </div>
+                    <span style={{fontSize:9,color:'rgba(0,200,120,.4)',flexShrink:0,marginLeft:8,marginTop:2}}>-&gt;</span>
+                  </a>
+                ))}
+              </div>
             </div>
           )}
 
