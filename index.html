@@ -2,33 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Climate Radar  -  Naif Alsalem</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Climate Radar</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap" rel="stylesheet"/>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0}
 html,body,#root{height:100%;overflow:hidden}
-body{background:#030c10;font-family:'IBM Plex Mono',monospace;color:#c8e6d4}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:#030c10}
-::-webkit-scrollbar-thumb{background:#1a3a28;border-radius:2px}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+body{background:#020b0a;font-family:'Share Tech Mono',monospace;color:#9ecfb8}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:#020b0a}
+::-webkit-scrollbar-thumb{background:#0d3326;border-radius:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.live-dot{animation:pulse 1.2s infinite}
-.alert-card{animation:fadeUp .3s ease forwards;transition:all .18s}
-.alert-card:hover{background:rgba(0,210,130,.07)!important}
-.btn-green{transition:all .18s;cursor:pointer}
-.btn-green:hover{background:rgba(0,220,130,.2)!important;border-color:#00e87a!important;color:#00e87a!important}
-.chip-btn{transition:all .15s;cursor:pointer}
-.chip-btn:hover{border-color:#00e87a!important;color:#00e87a!important}
-.spin{animation:spin .7s linear infinite;display:inline-block}
-input:focus{outline:none;border-color:rgba(0,230,130,.5)!important;box-shadow:0 0 8px rgba(0,200,120,.1)}
-input::placeholder{color:rgba(0,180,100,.35)}
+.blink{animation:blink 1.4s infinite}
+.spin-anim{animation:spin .7s linear infinite;display:inline-block}
+.card{animation:fadeIn .25s ease forwards;cursor:pointer;transition:background .15s,border-color .15s}
+.card:hover{background:rgba(0,200,120,.06)!important}
+.btn{transition:all .15s;cursor:pointer;font-family:'Share Tech Mono',monospace}
+.btn:hover:not(:disabled){filter:brightness(1.3)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input{font-family:'Share Tech Mono',monospace}
+input:focus{outline:none}
+input::placeholder{color:rgba(100,180,140,.35)}
 </style>
 </head>
 <body>
@@ -36,839 +36,701 @@ input::placeholder{color:rgba(0,180,100,.35)}
 <script type="text/babel">
 const {useState,useEffect,useRef}=React;
 
-// Dynamic date helper  -  always relative to today when the app runs
-const daysAgo=(n)=>{
-  const d=new Date();
-  d.setDate(d.getDate()-n);
-  return d.toISOString().slice(0,10);
+/* SECURITY */
+const HASH="8e1f192fe25ad49be764c3f55c68beb32f7aa66f85344e026b76cfaaa1d3d88a";
+async function sha256(s){
+  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+/* HELPERS */
+const RC=r=>r==='High'?'#ff4040':r==='Medium'?'#ffaa00':'#00c878';
+const RB=r=>r==='High'?'rgba(255,60,60,.12)':r==='Medium'?'rgba(255,170,0,.12)':'rgba(0,200,120,.12)';
+const RISK_ORDER={High:0,Medium:1,Low:2};
+
+const daysOld=s=>Math.floor((Date.now()-new Date(s))/(864e5));
+
+const freshness=d=>{
+  if(d<=1)  return{label:'TODAY',color:'#00ff99'};
+  if(d<=7)  return{label:'NEW',  color:'#00e87a'};
+  if(d<=30) return{label:d+'D',  color:'#00c878'};
+  if(d<=90) return{label:d+'D',  color:'#ffaa00'};
+  return      {label:'OLD',      color:'#ff6060'};
 };
 
-const ALL_ALERTS=[
-  {id:1,title:"IPCC AR7 Draft Language Shift",source:"IPCC",risk:"High",category:"Narrative",date:daysAgo(1),
-    summary:"New draft introduces binding language around fossil fuel phase-out timelines that could directly impact GCC economic strategies.",
-    link:"https://www.ipcc.ch/assessment-report/ar7/",
-    linkLabel:"ipcc.ch / AR7 Overview",
-    linkNote:"AR7 WG3 (Mitigation) in progress  -  outlines agreed Feb 2025, Hangzhou. Full report expected 2027-2028.",
-    kw:["IPCC","fossil fuel","phase-out","GCC"]},
-  {id:2,title:"EU Carbon Border Adjustment Expansion",source:"EU Commission",risk:"High",category:"Policy",date:daysAgo(2),
-    summary:"Proposed expansion of CBAM to include petrochemicals and fertilizers  -  critical export sectors for Saudi Arabia.",
-    link:"https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en",
-    linkLabel:"ec.europa.eu / CBAM Official Page",
-    linkNote:"Annex I product list  -  scope expansion under revision",
-    kw:["CBAM","carbon border","petrochemicals","Saudi"]},
-  {id:3,title:"G7 Climate Finance Pledge Shift",source:"G7 Presidency",risk:"Medium",category:"Finance",date:daysAgo(3),
-    summary:"New framing shifts climate finance from grants to loans, reducing support for developing nations' adaptation.",
-    link:"https://g7.gc.ca/en/g7-presidency/",
-    linkLabel:"g7.gc.ca / Canada G7 2025 Presidency",
-    linkNote:"Climate Finance communique  -  Section 4, para. 18 (grant vs. loan framing)",
-    kw:["climate finance","G7","loans"]},
-  {id:4,title:"UNFCCC GST Outcome Text Draft",source:"UNFCCC",risk:"High",category:"Negotiation",date:daysAgo(4),
-    summary:"Global Stocktake outcome references 'unabated fossil fuels' with ambiguous language that may set restrictive precedents.",
-    link:"https://unfccc.int/topics/global-stocktake",
-    linkLabel:"unfccc.int / Global Stocktake Hub",
-    linkNote:"Synthesis Report Ch. 3.2: Mitigation  -  'unabated fossil fuels' paragraph",
-    kw:["UNFCCC","fossil fuels","GST"]},
-  {id:5,title:"IEA Net Zero Pathway Update",source:"IEA",risk:"Medium",category:"Narrative",date:daysAgo(5),
-    summary:"Updated scenario models show accelerated demand decline for oil by 2035  -  8 years earlier than previous projections.",
-    link:"https://www.iea.org/reports/world-energy-outlook-2025/stated-policies-scenario",
-    linkLabel:"iea.org / WEO 2025  -  Stated Policies Scenario",
-    linkNote:"Oil demand peaks ~2030 then declines  -  see fossil fuel demand trajectory tables",
-    kw:["IEA","net zero","oil demand"]},
-  {id:6,title:"Saudi Vision 2030 Climate Alignment",source:"KPMG",risk:"Low",category:"Strategic",date:daysAgo(6),
-    summary:"Third-party assessment confirms Saudi renewable targets are on track, providing positive narrative leverage.",
-    link:"https://www.vision2030.gov.sa/en/",
-    linkLabel:"vision2030.gov.sa / Official Portal",
-    linkNote:"Energy & Environment pillar  -  renewable capacity milestones & sustainability targets",
-    kw:["Saudi","Vision 2030","renewables"]},
-  {id:7,title:"African Nations Climate Debt Coalition",source:"AU Summit",risk:"Low",category:"Alliance",date:daysAgo(7),
-    summary:"New African bloc positions align with Arab Group on historical responsibility  -  potential for coalition building.",
-    link:"https://au.int/en/climatechange",
-    linkLabel:"au.int / AU Climate Change",
-    linkNote:"AU Climate Declaration 2025  -  Art. 7: Historical Responsibility & Loss and Damage",
-    kw:["Africa","Arab Group","coalition","loss and damage"]},
-  {id:8,title:"COP31 Agenda Leak  -  Loss and Damage",source:"UNFCCC",risk:"Medium",category:"Negotiation",date:daysAgo(9),
-    summary:"Preliminary agenda shows Loss and Damage fund governance dispute to be a central flashpoint.",
-    link:"https://unfccc.int/fund-for-responding-to-loss-and-damage",
-    linkLabel:"unfccc.int / Fund for Responding to Loss & Damage",
-    linkNote:"Board governance section  -  composition dispute & Board meeting reports (2024-2025)",
-    kw:["COP31","loss and damage","governance"]},
-  {id:9,title:"Carbon Market Article 6 Stalemate",source:"UNFCCC Bulletin",risk:"Medium",category:"Policy",date:daysAgo(12),
-    summary:"Article 6.4 mechanism facing governance deadlock; could undermine voluntary carbon market credibility.",
-    link:"https://unfccc.int/process-and-meetings/the-paris-agreement/the-glasgow-climate-pact/cop26-outcomes-market-mechanisms-and-non-market-approaches-article-6",
-    linkLabel:"unfccc.int / Article 6  -  COP26 Outcomes",
-    linkNote:"Art. 6.4 Supervisory Body rules  -  mechanism operationalization & stalled credit issuance",
-    kw:["Article 6","carbon market","voluntary"]},
-  {id:10,title:"Methane Pledge Gap Warning  -  COP30 Status Report",source:"UNEP / GMP Ministerial",risk:"High",category:"Narrative",date:daysAgo(18),
-    summary:"UNEP's 2025 Global Methane Status Report warns emissions still rising despite GMP commitments. NDCs could deliver only 8% cut vs. 30% target  -  oil & gas implementation gap remains the critical pressure point for producers like Saudi Arabia.",
-    link:"https://www.globalmethanepledge.org/news/highlights-2025-global-methane-pledge-ministerial",
-    linkLabel:"globalmethanepledge.org / COP30 Ministerial Highlights",
-    linkNote:"Oil & Gas Methane Partnership 2.0  -  42% of global production covered. Implementation gap section.",
-    kw:["methane","oil gas","pledge","emissions","COP30"]},
-  {id:11,title:"World Bank Fossil Fuel Financing Phase-Down",source:"World Bank",risk:"High",category:"Finance",date:daysAgo(13),
-    summary:"World Bank accelerates timeline to phase down direct financing of upstream oil & gas projects  -  threatens development finance options for GCC energy infrastructure.",
-    link:"https://www.worldbank.org/en/topic/climatechange",
-    linkLabel:"worldbank.org / Climate Change Hub",
-    linkNote:"Energy Sector financing policy  -  upstream fossil fuel exclusion timeline",
-    kw:["World Bank","fossil fuel","finance","oil gas","upstream"]},
-  {id:12,title:"COP30 Belem NDC Ambition Ratchet Decision",source:"UNFCCC / COP30",risk:"High",category:"Negotiation",date:daysAgo(15),
-    summary:"COP30 Belem decision establishes automatic ambition ratchet  -  countries must submit economy-wide NDCs covering all sectors including oil & gas by 2026, increasing pressure on GCC states.",
-    link:"https://unfccc.int/cop30",
-    linkLabel:"unfccc.int / COP30 Belem",
-    linkNote:"Decision 1/CMA.7  -  NDC paragraphs 12-15 (economy-wide coverage requirement)",
-    kw:["COP30","NDC","ambition","Belem","economy-wide"]},
-  {id:13,title:"IEA Oil Demand Peak  -  2029 Revised Forecast",source:"IEA",risk:"High",category:"Narrative",date:daysAgo(16),
-    summary:"IEA revises oil demand peak to 2029 in STEPS scenario, driven by accelerating EV adoption in China and India  -  direct challenge to OPEC+ long-term demand narrative.",
-    link:"https://www.iea.org/topics/oil-market",
-    linkLabel:"iea.org / Oil Market",
-    linkNote:"Oil 2025 report  -  demand outlook chapter, STEPS vs NZE scenario comparison",
-    kw:["IEA","oil demand","peak","EV","OPEC","2029"]},
-  {id:14,title:"Saudi Arabia NDC 2035  -  Critically Insufficient Rating",source:"Climate Action Tracker",risk:"Medium",category:"Strategic",date:daysAgo(19),
-    summary:"Climate Action Tracker rates Saudi 2035 NDC as 'Critically Insufficient'  -  creates reputational exposure in multilateral forums ahead of COP31 Global Stocktake review.",
-    link:"https://climateactiontracker.org/countries/saudi-arabia/",
-    linkLabel:"climateactiontracker.org / Saudi Arabia Profile",
-    linkNote:"Rating section  -  2035 target vs. Paris-compatible pathways comparison",
-    kw:["Saudi Arabia","NDC","insufficient","rating","reputation","COP31"]},
-  {id:15,title:"Carbon Pricing  -  68 Jurisdictions Now Active",source:"World Bank",risk:"Medium",category:"Policy",date:daysAgo(21),
-    summary:"World Bank State and Trends report: carbon pricing covers 24% of global emissions across 68 jurisdictions  -  escalating competitiveness pressure on non-priced economies including GCC.",
-    link:"https://carbonpricingdashboard.worldbank.org/",
-    linkLabel:"carbonpricingdashboard.worldbank.org",
-    linkNote:"State and Trends 2025  -  coverage map and jurisdiction expansion table",
-    kw:["carbon pricing","carbon tax","World Bank","competitiveness","GCC"]},
-  {id:16,title:"Green Hydrogen Certification  -  GCC Strategic Opportunity",source:"IRENA",risk:"Low",category:"Strategic",date:daysAgo(23),
-    summary:"IRENA publishes green hydrogen certification framework positioning GCC solar resources as competitive exporters  -  direct strategic opportunity for Saudi Vision 2030 hydrogen agenda.",
-    link:"https://www.irena.org/Energy-Transition/Technology/Hydrogen",
-    linkLabel:"irena.org / Hydrogen Technology",
-    linkNote:"Green hydrogen certification section  -  production cost benchmarks and GCC competitiveness table",
-    kw:["hydrogen","IRENA","GCC","green","certification","Vision 2030"]},
-  {id:17,title:"EU Methane Regulation  -  Import Standards for LNG",source:"EU Commission",risk:"High",category:"Policy",date:daysAgo(25),
-    summary:"EU methane regulation sets measurability and reporting standards for imported LNG and pipeline gas  -  Saudi and GCC exporters must comply with OGMP 2.0 or face market access barriers.",
-    link:"https://energy.ec.europa.eu/topics/oil-gas-and-coal/methane-emissions_en",
-    linkLabel:"energy.ec.europa.eu / Methane Emissions",
-    linkNote:"Import provisions  -  Article 26-30 (third country operator obligations)",
-    kw:["EU","methane","LNG","import","OGMP","market access","GCC"]},
-  {id:18,title:"OPEC+ Voluntary Cuts Extended to 2026",source:"OPEC Secretariat",risk:"Low",category:"Strategic",date:daysAgo(27),
-    summary:"OPEC+ extends voluntary production cuts through 2026  -  provides Saudi Arabia narrative leverage around managed transition and market stability as a counter to phase-out pressure.",
-    link:"https://www.opec.org/opec_web/en/press_room/7470.htm",
-    linkLabel:"opec.org / Press Room",
-    linkNote:"Communique: voluntary adjustments schedule and exit mechanism  -  para. 4-7",
-    kw:["OPEC","production cuts","Saudi Arabia","market stability","transition"]},
-  {id:19,title:"Just Transition Finance Facility  -  Developing Nations Focus",source:"COP Presidency / UNFCCC",risk:"Medium",category:"Finance",date:daysAgo(29),
-    summary:"New Just Transition Finance Facility prioritizes middle-income fossil fuel economies  -  Saudi Arabia could leverage this for narrative repositioning if it meets eligibility criteria.",
-    link:"https://unfccc.int/topics/just-transition",
-    linkLabel:"unfccc.int / Just Transition",
-    linkNote:"Facility design section  -  eligibility criteria and governance structure",
-    kw:["just transition","finance","fossil fuel","developing","eligibility"]},
-  {id:20,title:"Fossil Fuel Non-Proliferation Treaty  -  12 New Nations",source:"FF Non-Proliferation Treaty",risk:"Medium",category:"Alliance",date:daysAgo(31),
-    summary:"12 additional nations endorse Fossil Fuel Non-Proliferation Treaty  -  growing coalition could shift UNGA dynamics and create new pressure track outside UNFCCC.",
-    link:"https://fossilfueltreaty.org/",
-    linkLabel:"fossilfueltreaty.org / Treaty Portal",
-    linkNote:"Endorsing nations list  -  new signatories section, Pacific Island states bloc",
-    kw:["fossil fuel treaty","non-proliferation","UNGA","coalition","Pacific"]},
-  {id:21,title:"AOSIS Demand  -  1.5°C Hard Limit in COP31 Text",source:"AOSIS",risk:"High",category:"Negotiation",date:daysAgo(33),
-    summary:"Alliance of Small Island States demands binding 1.5°C hard limit language in COP31 final text  -  would constrain remaining carbon budget and accelerate phase-out timelines for oil producers.",
-    link:"https://www.aosis.org/",
-    linkLabel:"aosis.org / Small Island States",
-    linkNote:"COP31 negotiating position  -  1.5°C hard limit demand and fossil fuel phase-out linkage",
-    kw:["AOSIS","1.5 degrees","COP31","phase-out","carbon budget","island states"]},
-  {id:22,title:"Carbon Capture Investment  -  Saudi Aramco $7B Commitment",source:"Saudi Aramco",risk:"Low",category:"Strategic",date:daysAgo(36),
-    summary:"Saudi Aramco announces $7B carbon capture and storage investment program  -  provides positive counter-narrative to phase-out pressure and strengthens abatement credibility.",
-    link:"https://www.aramco.com/en/sustainability/climate-change",
-    linkLabel:"aramco.com / Climate Change & CCS",
-    linkNote:"CCS program section  -  capture targets, project pipeline, and 2035 milestones",
-    kw:["Aramco","carbon capture","CCS","abatement","Saudi Arabia","investment"]},
-  {id:23,title:"G20 Climate Finance Gap  -  $3.5T Annual Shortfall",source:"G20 / OECD",risk:"Medium",category:"Finance",date:daysAgo(38),
-    summary:"OECD assessment for G20 identifies $3.5T annual climate finance shortfall  -  Arab Development Banks increasingly expected to contribute, creating pressure on GCC sovereign funds.",
-    link:"https://www.oecd.org/en/topics/climate-finance.html",
-    linkLabel:"oecd.org / Climate Finance",
-    linkNote:"G20 Finance Track  -  climate finance gap analysis and mobilisation pathways table",
-    kw:["G20","OECD","climate finance","gap","sovereign fund","GCC"]},
-  {id:24,title:"Blue Carbon  -  Arab Gulf Mangroves Recognition",source:"IUCN / UNEP",risk:"Low",category:"Strategic",date:daysAgo(40),
-    summary:"IUCN report recognizes Arab Gulf mangrove and seagrass ecosystems as high-value blue carbon sinks  -  Saudi Arabia can leverage for NDC credit and biodiversity diplomacy.",
-    link:"https://www.iucn.org/resources/issues-brief/blue-carbon",
-    linkLabel:"iucn.org / Blue Carbon",
-    linkNote:"Regional assessments  -  Arabian Gulf ecosystem carbon density estimates",
-    kw:["blue carbon","mangroves","GCC","Saudi Arabia","NDC credit","IUCN"]},
-  {id:25,title:"Plastics Treaty  -  Fossil Fuel Production Clause",source:"UNEP INC-5",risk:"Medium",category:"Policy",date:daysAgo(42),
-    summary:"Global plastics treaty negotiations include upstream fossil fuel production reduction clause  -  if adopted, creates new legal pathway to constrain petrochemical feedstock demand affecting Saudi exports.",
-    link:"https://www.unep.org/inc-plastic-pollution",
-    linkLabel:"unep.org / INC Plastic Pollution",
-    linkNote:"INC-5 draft text  -  Article 6 production and consumption caps, feedstock provisions",
-    kw:["plastics","petrochemicals","UNEP","treaty","feedstock","Saudi exports"]},
-  {id:26,title:"Nature-Based Solutions  -  Arab Restoration Pledge",source:"IUCN / CBD COP16",risk:"Low",category:"Alliance",date:daysAgo(45),
-    summary:"Arab nations submit joint nature restoration pledge at CBD COP16  -  creates positive multilateral narrative around Saudi green initiatives including 10 billion tree program.",
-    link:"https://www.cbd.int/cop/cop-16/",
-    linkLabel:"cbd.int / COP16 Cali",
-    linkNote:"National pledges section  -  Arab Group restoration commitments and 30x30 alignment",
-    kw:["nature","restoration","Arab","CBD","biodiversity","green Saudi"]},
-  {id:27,title:"Shipping Decarbonization  -  IMO 2030 Fuel Standard",source:"IMO",risk:"Medium",category:"Policy",date:daysAgo(47),
-    summary:"IMO adopts 2030 GHG fuel intensity standard for international shipping  -  impacts Saudi Aramco tanker fleet and crude export economics through compliance cost uplift.",
-    link:"https://www.imo.org/en/MediaCentre/Pages/WhatsNew-1928.aspx",
-    linkLabel:"imo.org / GHG Strategy",
-    linkNote:"Revised GHG Strategy  -  medium-term measure, fuel intensity targets table 2030-2040",
-    kw:["IMO","shipping","GHG","tanker","Saudi Aramco","fuel standard"]},
-  {id:28,title:"IPCC Synthesis Report  -  'Now or Never' Language",source:"IPCC",risk:"High",category:"Narrative",date:daysAgo(50),
-    summary:"IPCC Synthesis Report AR6 SPM uses 'now or never' framing for emissions cuts  -  language widely adopted by negotiators and media, eroding space for managed transition arguments.",
-    link:"https://www.ipcc.ch/report/ar6/syr/",
-    linkLabel:"ipcc.ch / AR6 Synthesis Report",
-    linkNote:"Summary for Policymakers  -  Section C.1, 'now or never' emissions reduction window",
-    kw:["IPCC","AR6","synthesis","now or never","emissions","framing"]},
-  {id:29,title:"Saudi NEOM  -  Green City Narrative Leverage",source:"NEOM / Vision 2030",risk:"Low",category:"Strategic",date:daysAgo(52),
-    summary:"NEOM green city project generates significant international media coverage as proof point for Saudi sustainability transition  -  valuable narrative asset in climate diplomacy.",
-    link:"https://www.neom.com/en-us/regions/theline",
-    linkLabel:"neom.com / THE LINE",
-    linkNote:"Sustainability claims section  -  zero carbon operations, renewable energy targets",
-    kw:["NEOM","Saudi Arabia","green city","narrative","diplomacy","Vision 2030"]},
-  {id:30,title:"Just Energy Transition Partnerships  -  GCC Exclusion Risk",source:"G7 / COP Presidency",risk:"Medium",category:"Alliance",date:daysAgo(55),
-    summary:"Just Energy Transition Partnerships (JETPs) expanded to 10 countries  -  GCC nations systematically excluded due to high-income classification, removing potential pathway to managed transition support.",
-    link:"https://unfccc.int/topics/just-transition",
-    linkLabel:"unfccc.int / Just Transition Partnerships",
-    linkNote:"JETP country list and eligibility criteria  -  high-income exclusion provision",
-    kw:["JETP","just transition","GCC","exclusion","G7","managed transition"]},
-];
-const TRENDS=[
-  {label:"Phase-out Language",trend:"+18%",dir:"up",risk:"High"},
-  {label:"Just Transition",trend:"+7%",dir:"up",risk:"Medium"},
-  {label:"Carbon Markets",trend:"-3%",dir:"down",risk:"Low"},
-  {label:"Adaptation Finance",trend:"+12%",dir:"up",risk:"Medium"},
-  {label:"CBAM References",trend:"+31%",dir:"up",risk:"High"},
-  {label:"Energy Security",trend:"+22%",dir:"up",risk:"Low"},
-];
-const RC=r=>r==="High"?"#ff3c3c":r==="Medium"?"#ffb400":"#00c878";
-const RB=r=>r==="High"?"rgba(255,60,60,0.12)":r==="Medium"?"rgba(255,180,0,0.12)":"rgba(0,200,120,0.12)";
-const FF="'IBM Plex Mono',monospace";
-const STATS={totalScanned:1284};
-
-/* ─── RADAR ─── */
-// Converts filtered alert list -> stable blip positions using golden-angle spread
-const alertsToBlips=(alerts)=>{
-  const GA=2.39996; // golden angle in radians  -  avoids clustering
-  const riskR={High:.35,Medium:.62,Low:.82}; // inner=dangerous, outer=low
-  return alerts.map((a,i)=>({
-    a:(i*GA)%(Math.PI*2),
-    r:riskR[a.risk]||.6,
-    risk:a.risk,
-    id:a.id
-  }));
+const autoRisk=text=>{
+  const t=text.toLowerCase();
+  if(['phase-out','phaseout','binding','mandatory','cbam','carbon border','unabated','ban fossil'].some(w=>t.includes(w)))return'High';
+  if(['opportunity','renewable','green hydrogen','blue carbon','cooperation','achievement'].some(w=>t.includes(w)))return'Low';
+  return'Medium';
+};
+const autoCat=(text,def)=>{
+  const t=text.toLowerCase();
+  if(['negotiat','cop ','unfccc','gst','ndc'].some(w=>t.includes(w)))return'Negotiation';
+  if(['financ','fund','billion','trillion'].some(w=>t.includes(w)))return'Finance';
+  if(['alliance','coalition','bloc','joint'].some(w=>t.includes(w)))return'Alliance';
+  if(['regulat','policy','law','directive'].some(w=>t.includes(w)))return'Policy';
+  if(['saudi','gcc','arab','opec','vision 2030'].some(w=>t.includes(w)))return'Strategic';
+  return def;
+};
+const autoKw=text=>{
+  const W=['IPCC','UNFCCC','IEA','CBAM','methane','fossil fuel','phase-out','NDC','COP','G7','carbon','Saudi','GCC','hydrogen','net zero','Article 6','loss and damage','just transition','OPEC','LNG'];
+  return W.filter(w=>text.toLowerCase().includes(w.toLowerCase())).slice(0,5);
 };
 
-const Radar=({size=290,alerts=[]})=>{
+/* TRENDS */
+const TREND_CFG=[
+  {label:'Phase-out Language', keys:['phase-out','phaseout','phase out','fossil fuel phase'],risk:'High'},
+  {label:'CBAM / Carbon Border',keys:['cbam','carbon border','carbon border adjustment'],risk:'High'},
+  {label:'Net Zero Pressure',  keys:['net zero','netzero','carbon neutral','1.5 degrees'],risk:'High'},
+  {label:'Fossil Fuel Finance', keys:['fossil fuel finance','divest','end fossil','fossil subsidy'],risk:'High'},
+  {label:'Just Transition',    keys:['just transition','equity','fair share','historical responsibility'],risk:'Medium'},
+  {label:'Adaptation Finance', keys:['adaptation finance','loss and damage','resilience fund'],risk:'Medium'},
+  {label:'Carbon Markets',     keys:['carbon market','article 6','voluntary carbon','carbon credit'],risk:'Low'},
+  {label:'Energy Security',    keys:['energy security','oil demand','gas supply','LNG'],risk:'Low'},
+];
+const computeTrends=(curr,prev)=>TREND_CFG.map(t=>{
+  const count=alerts=>{
+    const corpus=alerts.map(a=>(a.title+' '+a.summary).toLowerCase()).join(' ');
+    return t.keys.reduce((s,k)=>{const m=corpus.match(new RegExp(k,'g'));return s+(m?m.length:0);},0);
+  };
+  const c=count(curr),p=count(prev);
+  let pct=0,dir='flat';
+  if(p===0&&c>0){pct=Math.min(c*10,99);dir='up';}
+  else if(p>0){pct=Math.round(((c-p)/p)*100);dir=pct>0?'up':pct<0?'down':'flat';}
+  const abs=Math.min(Math.abs(pct),99);
+  const dynRisk=abs>20?'High':abs>5?'Medium':'Low';
+  return{...t,pct:abs,dir,display:(dir==='up'?'+':dir==='down'?'-':'')+abs+'%',dynRisk};
+}).sort((a,b)=>b.pct-a.pct);
+
+/* RSS SOURCES */
+const RSS_SOURCES=[
+  {name:'Carbon Brief',     url:'https://www.carbonbrief.org/feed/',                                            cat:'Narrative',   risk:'High'},
+  {name:'Climate Home',     url:'https://www.climatechangenews.com/feed/',                                      cat:'Negotiation', risk:'High'},
+  {name:'Guardian Climate', url:'https://www.theguardian.com/environment/climate-crisis/rss',                   cat:'Narrative',   risk:'Medium'},
+  {name:'BBC Environment',  url:'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',                cat:'Narrative',   risk:'Medium'},
+  {name:'UN Climate News',  url:'https://news.un.org/feed/subscribe/en/news/topic/climate-change/feed/rss.xml', cat:'Negotiation', risk:'High'},
+  {name:'Yale E360',        url:'https://e360.yale.edu/feed',                                                   cat:'Narrative',   risk:'Medium'},
+  {name:'DeSmog',           url:'https://www.desmog.com/feed/',                                                 cat:'Narrative',   risk:'High'},
+  {name:'Reuters Env',      url:'https://feeds.reuters.com/reuters/environment',                                cat:'Policy',      risk:'Medium'},
+  {name:'CleanTechnica',    url:'https://cleantechnica.com/feed/',                                              cat:'Strategic',   risk:'Low'},
+  {name:'E&E News',         url:'https://www.eenews.net/rss/feed',                                             cat:'Policy',      risk:'High'},
+];
+
+// Curated fallback signals — used when all live proxies fail
+const daysAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);};
+const CURATED=[
+  {id:1,title:'IPCC AR7 Draft — Fossil Fuel Phase-Out Language Tightened',source:'IPCC',risk:'High',category:'Narrative',date:daysAgo(1),summary:'AR7 WG3 draft introduces stronger binding language on fossil fuel phase-out timelines. GCC nations face increased pressure to justify continued upstream investment in final text negotiations.',link:'https://www.ipcc.ch/assessment-report/ar7/',linkLabel:'ipcc.ch / AR7',linkNote:'WG3 Mitigation chapter — energy systems section',kw:['IPCC','fossil fuel','phase-out','GCC']},
+  {id:2,title:'EU CBAM Scope Expansion — Petrochemicals Added to Draft',source:'EU Commission',risk:'High',category:'Policy',date:daysAgo(2),summary:'EU Carbon Border Adjustment Mechanism draft proposes expanding scope to include petrochemicals and fertilizers by 2027, directly threatening Saudi Arabia key export sectors.',link:'https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en',linkLabel:'ec.europa.eu / CBAM',linkNote:'Annex I product list — scope expansion provisions',kw:['CBAM','petrochemicals','Saudi','carbon border']},
+  {id:3,title:'UNFCCC GST Text — Unabated Fossil Fuels Definition Contested',source:'UNFCCC',risk:'High',category:'Negotiation',date:daysAgo(3),summary:'Global Stocktake outcome document contains ambiguous definition of unabated fossil fuels that could set restrictive precedents for GCC oil and gas operations under Paris Agreement review.',link:'https://unfccc.int/topics/global-stocktake',linkLabel:'unfccc.int / GST Hub',linkNote:'Synthesis Report Ch 3.2 — Mitigation section',kw:['UNFCCC','GST','unabated','fossil fuels']},
+  {id:4,title:'IEA Oil Demand Peak Revised to 2029 in STEPS Scenario',source:'IEA',risk:'High',category:'Narrative',date:daysAgo(4),summary:'Updated IEA modelling shows oil demand peaking in 2029 under stated policies, driven by EV adoption in China and India — directly challenges OPEC long-term demand narrative.',link:'https://www.iea.org/reports/world-energy-outlook-2025',linkLabel:'iea.org / WEO 2025',linkNote:'Oil demand chapter — STEPS scenario comparison table',kw:['IEA','oil demand','peak','OPEC']},
+  {id:5,title:'Global Methane Pledge — Implementation Gap Warning Issued',source:'UNEP',risk:'High',category:'Narrative',date:daysAgo(5),summary:'UNEP status report warns GMP signatories on track for only 8 percent emissions cut versus 30 percent target. Oil and gas sector faces intensified monitoring and compliance pressure.',link:'https://www.globalmethanepledge.org',linkLabel:'globalmethanepledge.org',linkNote:'Oil and Gas Pathway section — implementation gap analysis',kw:['methane','UNEP','oil gas','pledge']},
+  {id:6,title:'G7 Climate Finance — Shift from Grants to Loans Confirmed',source:'G7 Canada Presidency',risk:'Medium',category:'Finance',date:daysAgo(6),summary:'G7 communique confirms reframing of climate finance from grants to concessional loans, reducing financial support for developing nations adaptation — weakens Arab Group coalition on finance.',link:'https://g7.gc.ca/en/g7-presidency/',linkLabel:'g7.gc.ca / Climate Finance',linkNote:'Finance Track communique — Section 4 para 18',kw:['G7','climate finance','loans','developing']},
+  {id:7,title:'World Bank Upstream Oil Finance Phase-Down Announced',source:'World Bank',risk:'Medium',category:'Finance',date:daysAgo(7),summary:'World Bank accelerates timeline to phase down direct financing of upstream oil and gas projects by 2026, limiting multilateral development finance options for GCC energy projects.',link:'https://www.worldbank.org/en/topic/climatechange',linkLabel:'worldbank.org / Climate',linkNote:'Energy sector financing policy — upstream exclusion timeline',kw:['World Bank','fossil fuel','finance','upstream']},
+  {id:8,title:'Loss and Damage Fund — Board Governance Deadlock Continues',source:'UNFCCC',risk:'Medium',category:'Negotiation',date:daysAgo(8),summary:'Fund for Responding to Loss and Damage board remains deadlocked on voting rights structure. Developing nations demand 2/3 majority control, threatening fund operationalization before COP31.',link:'https://unfccc.int/fund-for-responding-to-loss-and-damage',linkLabel:'unfccc.int / L&D Fund',linkNote:'Board governance documents — composition dispute item 5b',kw:['loss and damage','fund','governance','COP31']},
+  {id:9,title:'African Climate Debt Coalition — Arab Group Alignment Potential',source:'AU Summit',risk:'Low',category:'Alliance',date:daysAgo(9),summary:'New African bloc positions on historical responsibility and climate debt closely align with Arab Group negotiating positions, creating coalition-building opportunity ahead of COP31.',link:'https://au.int/en/climatechange',linkLabel:'au.int / Climate Change',linkNote:'AU Climate Declaration — Article 7 historical responsibility',kw:['Africa','Arab Group','coalition','historical responsibility']},
+  {id:10,title:'Saudi Vision 2030 Renewable Targets — On Track Assessment',source:'KPMG',risk:'Low',category:'Strategic',date:daysAgo(10),summary:'Third party assessment confirms Saudi Arabia renewable energy capacity targets are progressing on schedule, providing positive narrative leverage in multilateral climate forums.',link:'https://www.vision2030.gov.sa/en/',linkLabel:'vision2030.gov.sa',linkNote:'Energy and Environment pillar — renewable milestones table',kw:['Saudi','Vision 2030','renewables','narrative']},
+  {id:11,title:'EU Methane Regulation — LNG Import Standards Take Effect',source:'EU Commission',risk:'High',category:'Policy',date:daysAgo(11),summary:'EU methane regulation imposes measurement and reporting requirements on imported LNG. GCC exporters must comply with OGMP 2.0 standards or face EU market access barriers by 2025.',link:'https://energy.ec.europa.eu/topics/oil-gas-and-coal/methane-emissions_en',linkLabel:'energy.ec.europa.eu / Methane',linkNote:'Article 26-30 import provisions — third country obligations',kw:['EU','methane','LNG','OGMP','market access']},
+  {id:12,title:'Carbon Markets Article 6.4 — Supervisory Body Deadlock',source:'UNFCCC Bulletin',risk:'Medium',category:'Policy',date:daysAgo(13),summary:'Article 6.4 mechanism faces ongoing governance deadlock at supervisory body level, undermining voluntary carbon market credibility and Saudi Arabia planned carbon trading participation.',link:'https://unfccc.int/process-and-meetings/the-paris-agreement/the-glasgow-climate-pact/cop26-outcomes-market-mechanisms-and-non-market-approaches-article-6',linkLabel:'unfccc.int / Article 6',linkNote:'Art 6.4 Supervisory Body — SB62 session notes item 11',kw:['Article 6','carbon market','UNFCCC','voluntary']},
+  {id:13,title:'Green Hydrogen Certification Framework — GCC Export Opportunity',source:'IRENA',risk:'Low',category:'Strategic',date:daysAgo(15),summary:'IRENA publishes green hydrogen certification framework positioning GCC solar resources as globally competitive. Direct strategic opportunity for Saudi Vision 2030 hydrogen export ambitions.',link:'https://www.irena.org/Energy-Transition/Technology/Hydrogen',linkLabel:'irena.org / Hydrogen',linkNote:'Certification section — GCC competitiveness benchmarks',kw:['hydrogen','IRENA','GCC','Vision 2030']},
+  {id:14,title:'Fossil Fuel Non-Proliferation Treaty — New Endorsements',source:'FF Non-Proliferation Treaty',risk:'Medium',category:'Alliance',date:daysAgo(16),summary:'Additional nations endorse Fossil Fuel Non-Proliferation Treaty, growing coalition that operates outside UNFCCC and could shift UNGA dynamics against oil-producing states.',link:'https://fossilfueltreaty.org/',linkLabel:'fossilfueltreaty.org',linkNote:'Endorsing nations list — new signatories section',kw:['fossil fuel treaty','non-proliferation','UNGA','coalition']},
+  {id:15,title:'AOSIS Demands Binding 1.5C Language in COP31 Text',source:'AOSIS',risk:'High',category:'Negotiation',date:daysAgo(17),summary:'Alliance of Small Island States formally demands binding 1.5 degree hard limit language in COP31 final text, which would severely constrain remaining carbon budget for oil-producing nations.',link:'https://www.aosis.org/',linkLabel:'aosis.org',linkNote:'COP31 negotiating position — 1.5C hard limit demand',kw:['AOSIS','1.5 degrees','COP31','carbon budget']},
+];
+
+const fetchFeed=async src=>{
+  const parseXML=xml=>{
+    const doc=new DOMParser().parseFromString(xml,'text/xml');
+    return[...doc.querySelectorAll('item,entry')].map(el=>({
+      title:(el.querySelector('title')?.textContent||'').trim(),
+      description:(el.querySelector('description,summary,content')?.textContent||'').replace(/<[^>]*>/g,'').trim(),
+      link:el.querySelector('link')?.textContent?.trim()||el.querySelector('link')?.getAttribute('href')||'',
+      pubDate:el.querySelector('pubDate,published,updated')?.textContent||'',
+    })).filter(i=>i.title.length>5);
+  };
+  const proxies=[
+    async()=>{
+      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(src.url));
+      if(!r.ok)throw new Error('fail');
+      return parseXML(await r.text());
+    },
+    async()=>{
+      const r=await fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(src.url)+'&count=50');
+      const d=await r.json();
+      if(d.status!=='ok'||!d.items?.length)throw new Error('fail');
+      return d.items;
+    },
+    async()=>{
+      const r=await fetch('https://corsproxy.io/?'+encodeURIComponent(src.url));
+      if(!r.ok)throw new Error('fail');
+      return parseXML(await r.text());
+    },
+    async()=>{
+      const r=await fetch('https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(src.url));
+      if(!r.ok)throw new Error('fail');
+      return parseXML(await r.text());
+    },
+    async()=>{
+      const r=await fetch('https://thingproxy.freeboard.io/fetch/'+encodeURIComponent(src.url));
+      if(!r.ok)throw new Error('fail');
+      return parseXML(await r.text());
+    },
+  ];
+  for(const proxy of proxies){
+    try{
+      const ctrl=new AbortController();
+      const t=setTimeout(()=>ctrl.abort(),8000);
+      const items=await proxy();
+      clearTimeout(t);
+      if(items&&items.length>0)return items;
+    }catch(e){}
+  }
+  return[];
+};
+
+/* RADAR CANVAS */
+const Radar=({alerts,size=300})=>{
   const ref=useRef(null);
-  const alertsRef=useRef(alerts);
+  const liveRef=useRef(alerts);
   const trailsRef=useRef({});
-
-  // keep ref in sync without restarting animation
   useEffect(()=>{
-    // reset trails for blips that disappeared
     const ids=new Set(alerts.map(a=>a.id));
-    Object.keys(trailsRef.current).forEach(k=>{ if(!ids.has(Number(k))) delete trailsRef.current[k]; });
-    alertsRef.current=alerts;
+    Object.keys(trailsRef.current).forEach(k=>{if(!ids.has(+k))delete trailsRef.current[k];});
+    liveRef.current=alerts;
   },[alerts]);
-
   useEffect(()=>{
     const c=ref.current;if(!c)return;
-    const ctx=c.getContext("2d");
-    let ang=0,id;
+    const ctx=c.getContext('2d');
+    let ang=0,raf;
+    const GA=2.39996;
+    const rMap={High:.3,Medium:.58,Low:.82};
     const draw=()=>{
-      const W=c.width,H=c.height,cx=W/2,cy=H/2,R=Math.min(W,H)/2-12;
+      const W=c.width,H=c.height,cx=W/2,cy=H/2,R=Math.min(W,H)/2-8;
       ctx.clearRect(0,0,W,H);
       const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
-      g.addColorStop(0,"rgba(0,50,28,.5)");g.addColorStop(1,"rgba(0,0,0,0)");
+      g.addColorStop(0,'rgba(0,60,35,.55)');g.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fill();
       [.25,.5,.75,1].forEach(r=>{
         ctx.beginPath();ctx.arc(cx,cy,R*r,0,Math.PI*2);
-        ctx.strokeStyle=`rgba(0,200,150,${r===1?.2:.1})`;ctx.lineWidth=r===1?1.2:.7;ctx.stroke();
+        ctx.strokeStyle='rgba(0,200,140,'+(r===1?.22:.09)+')';ctx.lineWidth=r===1?1.2:.6;ctx.stroke();
       });
-      [0,Math.PI/6,Math.PI/3,Math.PI/2,2*Math.PI/3,5*Math.PI/6].forEach(a=>{
+      for(let i=0;i<6;i++){
+        const a=i*Math.PI/6;
         ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
         ctx.lineTo(cx-Math.cos(a)*R,cy-Math.sin(a)*R);
-        ctx.strokeStyle="rgba(0,200,150,.07)";ctx.lineWidth=.5;ctx.stroke();
-      });
+        ctx.strokeStyle='rgba(0,200,140,.06)';ctx.lineWidth=.5;ctx.stroke();
+      }
       for(let i=0;i<80;i++){
         const sa=ang-(i*Math.PI)/120;
         ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,sa,sa+Math.PI/120);
-        ctx.fillStyle=`rgba(0,220,130,${(1-i/80)*.24})`;ctx.fill();
+        ctx.fillStyle='rgba(0,230,140,'+(1-i/80)*.22+')';ctx.fill();
       }
       ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(ang)*R,cy+Math.sin(ang)*R);
-      ctx.strokeStyle="rgba(0,245,155,.95)";ctx.lineWidth=2;ctx.stroke();
-
-      // draw blips from live alertsRef
-      const blips=alertsToBlips(alertsRef.current);
-      blips.forEach((b)=>{
-        if(!trailsRef.current[b.id]) trailsRef.current[b.id]=[];
-        const trail=trailsRef.current[b.id];
-        const bx=cx+Math.cos(b.a)*R*b.r,by=cy+Math.sin(b.a)*R*b.r;
-        const diff=((b.a-ang)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+      ctx.strokeStyle='rgba(0,245,155,.9)';ctx.lineWidth=2;ctx.stroke();
+      liveRef.current.forEach((a,i)=>{
+        if(!trailsRef.current[a.id])trailsRef.current[a.id]=[];
+        const tr=trailsRef.current[a.id];
+        const bAng=(i*GA)%(Math.PI*2);
+        const bRad=rMap[a.risk]||.58;
+        const bx=cx+Math.cos(bAng)*R*bRad,by=cy+Math.sin(bAng)*R*bRad;
+        const diff=((bAng-ang)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
         const fresh=diff<.35?1:diff>5.9?(6.28-diff)/.38:0;
-        if(fresh>0)trail.push({x:bx,y:by,a:fresh});
-        if(trail.length>10)trail.shift();
-        const col=b.risk==="High"?"255,60,60":b.risk==="Medium"?"255,180,0":"0,200,120";
-        trail.forEach((t,ti)=>{ctx.beginPath();ctx.arc(t.x,t.y,3,0,Math.PI*2);ctx.fillStyle=`rgba(${col},${(ti/trail.length)*t.a*.6})`;ctx.fill();});
-        ctx.beginPath();ctx.arc(bx,by,5,0,Math.PI*2);ctx.fillStyle=`rgba(${col},.95)`;ctx.fill();
-        ctx.beginPath();ctx.arc(bx,by,11,0,Math.PI*2);ctx.strokeStyle=`rgba(${col},.22)`;ctx.lineWidth=1;ctx.stroke();
+        if(fresh>0)tr.push({x:bx,y:by,a:fresh});
+        if(tr.length>12)tr.shift();
+        const col=a.risk==='High'?'255,60,60':a.risk==='Medium'?'255,170,0':'0,200,120';
+        tr.forEach((t,ti)=>{ctx.beginPath();ctx.arc(t.x,t.y,2.5,0,Math.PI*2);ctx.fillStyle='rgba('+col+','+(ti/tr.length)*t.a*.55+')';ctx.fill();});
+        ctx.beginPath();ctx.arc(bx,by,4.5,0,Math.PI*2);ctx.fillStyle='rgba('+col+',.95)';ctx.fill();
+        ctx.beginPath();ctx.arc(bx,by,9,0,Math.PI*2);ctx.strokeStyle='rgba('+col+',.2)';ctx.lineWidth=1;ctx.stroke();
       });
-
-      // show "no results" pulse when empty
-      if(blips.length===0){
-        ctx.beginPath();ctx.arc(cx,cy,R*.5,0,Math.PI*2);
-        ctx.strokeStyle=`rgba(100,100,100,${.1+.05*Math.sin(ang*4)})`;ctx.lineWidth=1;ctx.stroke();
-      }
-
-      ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fillStyle="rgba(0,245,155,.9)";ctx.fill();
-      ctx.beginPath();ctx.arc(cx,cy,11,0,Math.PI*2);ctx.strokeStyle="rgba(0,245,155,.3)";ctx.lineWidth=1;ctx.stroke();
-      ang=(ang+.018)%(Math.PI*2);id=requestAnimationFrame(draw);
+      ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fillStyle='rgba(0,245,155,.9)';ctx.fill();
+      ang=(ang+.017)%(Math.PI*2);
+      raf=requestAnimationFrame(draw);
     };
-    draw();return()=>cancelAnimationFrame(id);
+    draw();
+    return()=>cancelAnimationFrame(raf);
   },[]);
-  return <canvas ref={ref} width={size} height={size} style={{borderRadius:"50%",display:"block"}}/>;
+  return React.createElement('canvas',{ref,width:size,height:size,style:{borderRadius:'50%',display:'block'}});
 };
 
-/* ─── PDF ─── */
-const makePDF=(alerts,keywords)=>{
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+/* PDF */
+const makePDF=(alerts,keywords,trends)=>{
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const W=doc.internal.pageSize.getWidth();
   let y=0;
   const np=()=>{if(y>268){doc.addPage();y=16;}};
-
-  // cover header
-  doc.setFillColor(3,12,16);doc.rect(0,0,W,36,"F");
-  doc.setDrawColor(0,200,120);doc.setLineWidth(.4);doc.line(0,36,W,36);
-  doc.setFontSize(20);doc.setTextColor(0,232,122);doc.setFont("helvetica","bold");
-  doc.text("CLIMATE RADAR",14,16);
-  doc.setFontSize(10);doc.setTextColor(0,180,100);doc.setFont("helvetica","normal");
-  doc.text("Strategic Intelligence Report",14,24);
-  doc.setFontSize(9);doc.setTextColor(100,160,130);
-  doc.text("Prepared by: Naif Alsalem",14,31);
-  doc.text("Generated: "+new Date().toLocaleString(),W-70,31);
-  y=44;
-
+  doc.setFillColor(2,11,10);doc.rect(0,0,W,32,'F');
+  doc.setDrawColor(0,200,120);doc.setLineWidth(.4);doc.line(0,32,W,32);
+  doc.setFontSize(18);doc.setTextColor(0,230,122);doc.setFont('helvetica','bold');
+  doc.text('CLIMATE RADAR',14,14);
+  doc.setFontSize(9);doc.setTextColor(0,180,100);doc.setFont('helvetica','normal');
+  doc.text('Strategic Intelligence Report',14,22);
+  doc.text('Prepared by: Naif Alsalem',14,28);
+  doc.text('Generated: '+new Date().toLocaleString(),W-70,28);
+  y=40;
   if(keywords.length){
-    doc.setFontSize(9);doc.setTextColor(0,200,120);doc.setFont("helvetica","bold");
-    doc.text("ACTIVE KEYWORD WATCH: "+keywords.join(" · "),14,y);y+=10;
+    doc.setFontSize(8);doc.setTextColor(0,180,100);doc.setFont('helvetica','bold');
+    doc.text('KEYWORD WATCH: '+keywords.join(' / '),14,y);y+=8;
   }
-
-  // stats
-  doc.setFillColor(8,28,18);doc.rect(14,y-4,W-28,12,"F");
-  doc.setFontSize(9);doc.setTextColor(0,200,120);doc.setFont("helvetica","normal");
-  const hi=alerts.filter(a=>a.risk==="High").length;
-  const me=alerts.filter(a=>a.risk==="Medium").length;
-  const lo=alerts.filter(a=>a.risk==="Low").length;
-  doc.text(`Total: ${alerts.length} signals`,16,y+4);
-  doc.setTextColor(220,50,50);doc.text(`High: ${hi}`,60,y+4);
-  doc.setTextColor(220,160,0);doc.text(`Medium: ${me}`,90,y+4);
-  doc.setTextColor(0,180,100);doc.text(`Low: ${lo}`,125,y+4);
+  const hi=alerts.filter(a=>a.risk==='High').length;
+  const me=alerts.filter(a=>a.risk==='Medium').length;
+  const lo=alerts.filter(a=>a.risk==='Low').length;
+  doc.setFillColor(8,28,20);doc.rect(14,y-4,W-28,12,'F');
+  doc.setFontSize(9);
+  doc.setTextColor(0,200,120);doc.text('Total: '+alerts.length,16,y+4);
+  doc.setTextColor(220,50,50);doc.text('High: '+hi,55,y+4);
+  doc.setTextColor(220,160,0);doc.text('Medium: '+me,85,y+4);
+  doc.setTextColor(0,180,100);doc.text('Low: '+lo,120,y+4);
   y+=18;
-
-  doc.setFontSize(12);doc.setTextColor(0,220,130);doc.setFont("helvetica","bold");
-  doc.text("INTELLIGENCE FEED",14,y);y+=8;
-
+  if(trends.some(t=>t.pct>0)){
+    doc.setFontSize(10);doc.setTextColor(0,220,130);doc.setFont('helvetica','bold');
+    doc.text('NARRATIVE SHIFT INDEX',14,y);y+=7;
+    trends.slice(0,8).forEach(t=>{
+      np();
+      const rc=t.dynRisk==='High'?[220,50,50]:t.dynRisk==='Medium'?[220,160,0]:[0,180,100];
+      doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(...rc);
+      doc.text((t.dir==='up'?'^':t.dir==='down'?'v':'-')+' '+t.label+': '+t.display,16,y);y+=5;
+    });
+    y+=4;
+  }
+  doc.setFontSize(11);doc.setTextColor(0,220,130);doc.setFont('helvetica','bold');
+  doc.text('INTELLIGENCE FEED',14,y);y+=8;
   alerts.forEach((a,i)=>{
     np();
-    const rc=a.risk==="High"?[200,40,40]:a.risk==="Medium"?[200,140,0]:[0,160,90];
-    const bg=a.risk==="High"?[40,8,8]:a.risk==="Medium"?[40,28,4]:[4,28,16];
-    doc.setFillColor(...bg);doc.rect(14,y-4,W-28,30,"F");
-    doc.setFillColor(...rc);doc.rect(14,y-4,3,30,"F");
-    doc.setFontSize(11);doc.setTextColor(220,240,228);doc.setFont("helvetica","bold");
-    doc.text(`${i+1}. ${a.title}`,20,y+3);
+    const rc=a.risk==='High'?[200,40,40]:a.risk==='Medium'?[200,140,0]:[0,160,90];
+    const bg=a.risk==='High'?[40,8,8]:a.risk==='Medium'?[40,28,4]:[4,28,16];
+    doc.setFillColor(...bg);doc.rect(14,y-4,W-28,32,'F');
+    doc.setFillColor(...rc);doc.rect(14,y-4,3,32,'F');
+    doc.setFontSize(10);doc.setTextColor(220,240,230);doc.setFont('helvetica','bold');
+    doc.text((i+1)+'. '+a.title.slice(0,80),20,y+2);
     doc.setFontSize(8);doc.setTextColor(...rc);
-    doc.text(`[ ${a.risk.toUpperCase()} ]  ${a.category}`,W-50,y+3);
-    doc.setFontSize(9);doc.setTextColor(160,200,180);doc.setFont("helvetica","normal");
-    const lines=doc.splitTextToSize(a.summary,W-40);
-    doc.text(lines,20,y+11);
-    doc.setFontSize(8);doc.setTextColor(80,140,100);
-    doc.text(`Source: ${a.source}   Date: ${a.date}`,20,y+24);
-    if(a.link&&a.link!=="undefined"&&a.link!=="#"){
-      doc.setTextColor(0,140,200);
-      doc.textWithLink("View Source",20,y+28,{url:a.link});
-    }
+    doc.text('['+a.risk.toUpperCase()+'] '+a.category,W-48,y+2);
+    doc.setFontSize(8);doc.setTextColor(160,200,180);doc.setFont('helvetica','normal');
+    const lines=doc.splitTextToSize(a.summary.slice(0,300),W-38);
+    doc.text(lines.slice(0,2),20,y+9);
+    doc.setFontSize(7);doc.setTextColor(80,140,100);
+    doc.text(a.source+'   '+a.date,20,y+24);
+    if(a.link&&a.link!=='#'){doc.setTextColor(0,140,200);doc.textWithLink('Source ->',W-32,y+24,{url:a.link});}
     y+=36;np();
   });
-
-  // Footer red line
   doc.setDrawColor(200,30,30);doc.setLineWidth(.6);doc.line(14,279,W-14,279);
-  // Footer text  -  bold red
-  doc.setFontSize(8.5);doc.setTextColor(210,30,30);doc.setFont("helvetica","bold");
-  doc.text("Strategic Intelligence | Naif Alsalem",14,284);
-  doc.text("CONFIDENTIAL",W-32,284);
-  doc.save("ClimateRadar_"+new Date().toISOString().slice(0,10)+".pdf");
+  doc.setFontSize(8.5);doc.setTextColor(210,30,30);doc.setFont('helvetica','bold');
+  doc.text('Strategic Intelligence | Naif Alsalem',14,284);
+  doc.text('CONFIDENTIAL',W-32,284);
+  doc.save('ClimateRadar_'+new Date().toISOString().slice(0,10)+'.pdf');
 };
 
-/* ─── APP ─── */
+/* MAIN APP */
 function App(){
-  const [alerts,setAlerts]=useState(ALL_ALERTS);
-  const [filter,setFilter]=useState("All");
-  const [tab,setTab]=useState("alerts");
-  const [search,setSearch]=useState("");
-  const [sel,setSel]=useState(null);
-  const [scanning,setScanning]=useState(false);
-  const [scanMsg,setScanMsg]=useState("");
-  const [keywords,setKeywords]=useState(["fossil fuel","CBAM","phase-out"]);
-  const [newKw,setNewKw]=useState("");
-  const [kwResults,setKwResults]=useState([]);
-  const [lastScan,setLastScan]=useState("06 May 2026, 09:14 GST");
-  const [linkStatus,setLinkStatus]=useState({});
-  const [recentOnly,setRecentOnly]=useState(false);
-  const [sourcesScanned,setSourcesScanned]=useState(1284);
-  const [scanCount,setScanCount]=useState(0);
-  const [isLive,setIsLive]=useState(false);
+  const[authed,setAuthed]=useState(!!sessionStorage.getItem('cr_ok'));
+  const[pin,setPin]=useState('');
+  const[pinErr,setPinErr]=useState('');
 
-  const daysOld=(dateStr)=>{
-    const diff=Date.now()-new Date(dateStr).getTime();
-    return Math.floor(diff/(1000*60*60*24));
-  };
-  const freshnessLabel=(d)=>{
-    if(d<=7) return {label:"NEW",color:"#00e87a"};
-    if(d<=30) return {label:"RECENT",color:"#00c878"};
-    if(d<=90) return {label:`${d}D AGO`,color:"#ffb400"};
-    return {label:"STALE",color:"#ff6060"};
-  };
+  const[alerts,setAlerts]=useState([]);
+  const[prevAlerts,setPrevAlerts]=useState([]);
+  const[trends,setTrends]=useState(TREND_CFG.map(t=>({...t,pct:0,dir:'flat',display:'--',dynRisk:t.risk})));
+  const[filter,setFilter]=useState('All');
+  const[search,setSearch]=useState('');
+  const[tab,setTab]=useState('feed');
+  const[sel,setSel]=useState(null);
+  const[scanning,setScanning]=useState(false);
+  const[scanMsg,setScanMsg]=useState('');
+  const[scanCount,setScanCount]=useState(0);
+  const[totalFetched,setTotalFetched]=useState(0);
+  const[isLive,setIsLive]=useState(false);
+  const[lastScan,setLastScan]=useState('--');
+  const[keywords,setKeywords]=useState(['fossil fuel','CBAM','phase-out']);
+  const[newKw,setNewKw]=useState('');
+  const[kwResults,setKwResults]=useState([]);
+  const[linkSt,setLinkSt]=useState({});
+  const[recentOnly,setRecentOnly]=useState(false);
 
-  const verifyLink=async(alertId,url)=>{
-    if(!url||url==="#") return;
-    setLinkStatus(s=>({...s,[alertId]:"checking"}));
-    const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),7000);
-    try{
-      await fetch(url,{method:"HEAD",mode:"no-cors",signal:controller.signal,cache:"no-store"});
-      clearTimeout(timer);
-      // no-cors gives opaque response  -  domain is reachable
-      setLinkStatus(s=>({...s,[alertId]:"ok"}));
-    }catch(e){
-      clearTimeout(timer);
-      if(e.name==="AbortError"){
-        setLinkStatus(s=>({...s,[alertId]:"timeout"}));
-      }else{
-        // Network error = truly unreachable
-        setLinkStatus(s=>({...s,[alertId]:"fail"}));
-      }
-    }
+  const doAuth=async()=>{
+    const h=await sha256(pin.trim());
+    if(h===HASH){sessionStorage.setItem('cr_ok','1');setAuthed(true);}
+    else{setPinErr('Invalid code');setPin('');setTimeout(()=>setPinErr(''),2500);}
   };
-
-  // Auto-verify link when a signal is selected
-  useEffect(()=>{
-    if(sel&&!linkStatus[sel.id]){
-      verifyLink(sel.id,sel.link);
-    }
-  },[sel]);
 
   const filtered=alerts.filter(a=>
-    (filter==="All"||a.category===filter)&&
+    (filter==='All'||a.category===filter)&&
     (!recentOnly||daysOld(a.date)<=90)&&
-    (search===""||a.title.toLowerCase().includes(search.toLowerCase())||a.summary.toLowerCase().includes(search.toLowerCase()))
+    (search===''||
+      a.title.toLowerCase().includes(search.toLowerCase())||
+      a.summary.toLowerCase().includes(search.toLowerCase()))
   );
 
-  // Search filtered kwResults too
-  const filteredKw=kwResults.filter(a=>
-    search===""||a.title.toLowerCase().includes(search.toLowerCase())||a.summary.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const handleSearch=(val)=>{
-    setSearch(val);
-    // If on strategic tab (no list), jump to alerts so user sees results
-    if(tab==="strategic") setTab("alerts");
-  };
-
-  // ── RSS FEED SOURCES ────────────────────────────────────────
-  const RSS_SOURCES=[
-    {name:"UNFCCC",url:"https://unfccc.int/news/feed",category:"Negotiation",baseRisk:"High"},
-    {name:"IEA",url:"https://www.iea.org/rss/news.xml",category:"Narrative",baseRisk:"Medium"},
-    {name:"IPCC",url:"https://www.ipcc.ch/feed/",category:"Narrative",baseRisk:"High"},
-    {name:"EU Climate",url:"https://ec.europa.eu/commission/presscorner/api/rss?institution=COM&theme=CLIMA",category:"Policy",baseRisk:"Medium"},
-    {name:"UN Environment",url:"https://www.unep.org/rss.xml",category:"Narrative",baseRisk:"Medium"},
-  ];
-  // rss2json proxy  -  free, no key needed
-  const RSS2JSON="https://api.rss2json.com/v1/api.json?rss_url=";
-
-  // Auto-classify risk from title/description text
-  const classifyRisk=(text)=>{
-    const t=text.toLowerCase();
-    const high=["phase-out","phaseout","binding","mandatory","ban","eliminate","prohibit","unabated","critical","urgent","deadline","cbam","carbon border","fossil fuel subsidy"];
-    const low=["opportunity","investment","renewable","green hydrogen","blue carbon","restoration","cooperation","positive","milestone","achievement"];
-    if(high.some(w=>t.includes(w))) return "High";
-    if(low.some(w=>t.includes(w))) return "Low";
-    return "Medium";
-  };
-
-  // Map source to category based on content keywords
-  const classifyCategory=(text,defaultCat)=>{
-    const t=text.toLowerCase();
-    if(["negotiat","cop","unfccc","gst","ndc"].some(w=>t.includes(w))) return "Negotiation";
-    if(["financ","fund","invest","billion","trillion"].some(w=>t.includes(w))) return "Finance";
-    if(["alliance","coalition","bloc","joint","group"].some(w=>t.includes(w))) return "Alliance";
-    if(["regulat","policy","law","directive","standard","rule"].some(w=>t.includes(w))) return "Policy";
-    if(["saudi","gcc","arab","opec","vision 2030","aramco"].some(w=>t.includes(w))) return "Strategic";
-    return defaultCat;
-  };
-
-  // Extract keywords from text
-  const extractKw=(text)=>{
-    const WATCH=["IPCC","UNFCCC","IEA","CBAM","methane","fossil fuel","phase-out","NDC","COP31","COP30","G7","carbon","Saudi","GCC","Arab","hydrogen","net zero","Article 6","loss and damage","just transition","OPEC","LNG","petrochemical","green","renewable"];
-    return WATCH.filter(w=>text.toLowerCase().includes(w.toLowerCase())).slice(0,5);
-  };
+  const hi=alerts.filter(a=>a.risk==='High').length;
+  const me=alerts.filter(a=>a.risk==='Medium').length;
+  const lo=alerts.filter(a=>a.risk==='Low').length;
 
   const runScan=async()=>{
-    setScanning(true);
-    setScanMsg("Connecting to live sources...");
-
-    let liveAlerts=[];
-    let fetchedCount=0;
-
-    for(let si=0;si<RSS_SOURCES.length;si++){
-      const src=RSS_SOURCES[si];
-      setScanMsg(`Scanning ${src.name}...`);
+    if(scanning)return;
+    setScanning(true);setScanMsg('Initializing...');
+    let live=[];let fetched=0;
+    for(let i=0;i<RSS_SOURCES.length;i++){
+      const src=RSS_SOURCES[i];
+      setScanMsg('Scanning '+src.name+'...');
       try{
-        const res=await fetch(`${RSS2JSON}${encodeURIComponent(src.url)}&count=20`,{signal:AbortSignal.timeout(8000)});
-        const data=await res.json();
-        if(data.status==="ok"&&data.items){
-          fetchedCount+=data.items.length;
-          // No artificial cap - use all fetched items
-          data.items.forEach((item,idx)=>{
-            const title=item.title||"";
-            const desc=(item.description||item.content||"").replace(/<[^>]*>/g,"").slice(0,200);
-            const combined=title+" "+desc;
-            const pubDate=item.pubDate?new Date(item.pubDate).toISOString().slice(0,10):new Date().toISOString().slice(0,10);
-            liveAlerts.push({
-              id:Date.now()+si*100+idx,
-              title:title.slice(0,80),
-              source:src.name,
-              risk:classifyRisk(combined),
-              category:classifyCategory(combined,src.category),
-              date:pubDate,
-              summary:desc||title,
-              link:item.link||item.guid||"#",
-              linkLabel:`${src.name} / ${title.slice(0,40)}...`,
-              linkNote:"Live feed  -  fetched "+new Date().toLocaleDateString("en-GB"),
-              kw:extractKw(combined),
-            });
+        const items=await fetchFeed(src);
+        fetched+=items.length;
+        items.forEach((item,idx)=>{
+          const title=(item.title||'').slice(0,150);
+          const desc=(item.description||'').replace(/<[^>]*>/g,'').slice(0,500);
+          const combined=title+' '+desc;
+          const pubDate=item.pubDate
+            ?new Date(item.pubDate).toISOString().slice(0,10)
+            :new Date().toISOString().slice(0,10);
+          live.push({
+            id:i*10000+idx+Math.floor(Math.random()*1000),
+            title,source:src.name,
+            risk:autoRisk(combined),
+            category:autoCat(combined,src.cat),
+            date:pubDate,
+            summary:desc||title,
+            link:item.link||'#',
+            linkLabel:src.name,
+            linkNote:'Live feed - fetched '+new Date().toLocaleDateString('en-GB'),
+            kw:autoKw(combined),
           });
-        }
-      }catch(e){
-        // Source failed  -  skip silently
-      }
+        });
+      }catch(e){}
     }
-
-    setScanMsg("Analyzing strategic relevance...");
-    await new Promise(r=>setTimeout(r,600));
-
-    // If live fetch got results, use them; otherwise fall back to ALL_ALERTS
-    const finalAlerts=liveAlerts.length>0
-      ? liveAlerts.sort((a,b)=>{const o={High:0,Medium:1,Low:2};return o[a.risk]-o[b.risk];})
-      : [...ALL_ALERTS].sort(()=>Math.random()-.45);
-
-    setScanMsg("Building threat matrix...");
-    await new Promise(r=>setTimeout(r,500));
-
-    setAlerts(finalAlerts);
-    setIsLive(liveAlerts.length>0);
+    setScanMsg('Analyzing...');
+    await new Promise(r=>setTimeout(r,400));
+    // If all proxies failed, use curated intelligence as fallback
+    const source=live.length>0?live:CURATED;
+    const final=source.sort((a,b)=>RISK_ORDER[a.risk]-RISK_ORDER[b.risk]);
+    setAlerts(final);
+    setTrends(computeTrends(final,prevAlerts));
+    setPrevAlerts(final);
+    setIsLive(live.length>0);
+    setTotalFetched(n=>n+(fetched||CURATED.length));
+    setScanCount(n=>n+1);
     const n=new Date();
-    setLastScan(n.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})+", "+n.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})+" GST");
-    setSourcesScanned(s=>s+(fetchedCount||Math.floor(Math.random()*38+12)));
-    setScanCount(c=>c+1);
-    setScanning(false);setScanMsg("");
+    setLastScan(
+      n.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+
+      ' '+n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' GST'
+    );
+    setScanning(false);setScanMsg('');
   };
 
   const addKw=()=>{
-    const k=newKw.trim();if(!k||keywords.includes(k))return;
-    setKeywords([...keywords,k]);setNewKw("");
+    const k=newKw.trim();
+    if(k&&!keywords.includes(k)){setKeywords([...keywords,k]);setNewKw('');}
   };
-
-  const scanKw=()=>{
-    const res=ALL_ALERTS.filter(a=>
-      keywords.some(kw=>
-        a.title.toLowerCase().includes(kw.toLowerCase())||
-        a.summary.toLowerCase().includes(kw.toLowerCase())||
-        a.kw.some(ak=>ak.toLowerCase().includes(kw.toLowerCase()))
-      )
+  const doKwScan=()=>{
+    const res=alerts.filter(a=>
+      keywords.some(kw=>(a.title+' '+a.summary+(a.kw||[]).join(' ')).toLowerCase().includes(kw.toLowerCase()))
     );
-    setKwResults(res);setTab("keywords");
+    setKwResults(res);setTab('keywords');
   };
 
-  const hi=alerts.filter(a=>a.risk==="High").length;
-  const me=alerts.filter(a=>a.risk==="Medium").length;
-  const lo=alerts.filter(a=>a.risk==="Low").length;
+  const verifyLink=async(id,url)=>{
+    if(!url||url==='#')return;
+    setLinkSt(s=>({...s,[id]:'checking'}));
+    try{
+      const ctrl=new AbortController();
+      setTimeout(()=>ctrl.abort(),7000);
+      await fetch(url,{method:'HEAD',mode:'no-cors',signal:ctrl.signal});
+      setLinkSt(s=>({...s,[id]:'ok'}));
+    }catch(e){
+      setLinkSt(s=>({...s,[id]:e.name==='AbortError'?'timeout':'fail'}));
+    }
+  };
+  useEffect(()=>{if(sel&&!linkSt[sel.id])verifyLink(sel.id,sel.link);},[sel]);
 
+  /* AUTH SCREEN */
+  if(!authed)return(
+    <div style={{height:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'#020b0a',fontFamily:"'Share Tech Mono',monospace"}}>
+      <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:26,fontWeight:900,color:'#00e87a',letterSpacing:4,textShadow:'0 0 28px rgba(0,232,122,.5)',marginBottom:6}}>CLIMATE RADAR</div>
+      <div style={{fontSize:11,color:'rgba(0,200,120,.45)',letterSpacing:3,marginBottom:36}}>STRATEGIC INTELLIGENCE PLATFORM</div>
+      <div style={{fontSize:10,color:'rgba(0,200,120,.4)',letterSpacing:2,marginBottom:10}}>ENTER ACCESS CODE</div>
+      <input type="password" value={pin} onChange={e=>setPin(e.target.value)}
+        onKeyDown={e=>e.key==='Enter'&&doAuth()} maxLength={12} placeholder="........"
+        style={{width:200,background:'rgba(0,40,25,.6)',border:'1px solid rgba(0,200,120,.35)',
+          color:'#c8e6d4',fontSize:20,letterSpacing:8,padding:'11px 16px',textAlign:'center',borderRadius:2,marginBottom:10}}/>
+      <div style={{height:16,fontSize:10,color:'#ff4040',marginBottom:8}}>{pinErr}</div>
+      <button onClick={doAuth} className="btn"
+        style={{padding:'9px 40px',background:'rgba(0,200,120,.1)',border:'1px solid rgba(0,200,120,.4)',
+          color:'#00e87a',fontSize:11,letterSpacing:2,borderRadius:2}}>
+        AUTHENTICATE
+      </button>
+      <div style={{position:'absolute',bottom:18,fontSize:9,color:'rgba(0,200,120,.2)',letterSpacing:2}}>
+        AUTHORIZED ACCESS ONLY - Naif Alsalem - CONFIDENTIAL
+      </div>
+    </div>
+  );
+
+  /* MAIN UI */
   return(
-  <div style={{fontFamily:FF,background:"#030c10",color:"#c8e6d4",height:"100vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-    <div style={{position:"fixed",inset:0,background:"repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.022) 2px,rgba(0,0,0,.022) 4px)",pointerEvents:"none",zIndex:0}}/>
+  <div style={{height:'100vh',display:'flex',flexDirection:'column',background:'#020b0a',color:'#9ecfb8',overflow:'hidden',position:'relative'}}>
+    <div style={{position:'fixed',inset:0,background:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px)',pointerEvents:'none',zIndex:0}}/>
 
     {/* HEADER */}
-    <div style={{background:"rgba(2,10,16,.98)",borderBottom:"1px solid rgba(0,200,120,.2)",padding:"12px 28px",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:10,flexShrink:0}}>
+    <div style={{background:'rgba(1,8,7,.97)',borderBottom:'1px solid rgba(0,200,120,.18)',padding:'10px 24px',display:'flex',alignItems:'flex-end',justifyContent:'space-between',flexShrink:0,zIndex:10}}>
       <div>
-        <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:28,fontWeight:900,letterSpacing:4,color:"#00e87a",textShadow:"0 0 28px rgba(0,232,122,.55)",lineHeight:1.1}}>* CLIMATE RADAR</div>
-        <div style={{fontSize:14,color:"rgba(0,210,120,.6)",letterSpacing:3,marginTop:3,fontWeight:600}}>STRATEGIC INTELLIGENCE</div>
-        <div style={{fontSize:12,color:"rgba(0,210,130,.5)",letterSpacing:2,marginTop:3,fontFamily:"'Orbitron',sans-serif"}}>Naif Alsalem</div>
+        <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:26,fontWeight:900,letterSpacing:4,color:'#00e87a',textShadow:'0 0 24px rgba(0,232,122,.5)',lineHeight:1.1}}>CLIMATE RADAR</div>
+        <div style={{fontSize:13,color:'rgba(0,210,120,.55)',letterSpacing:3,marginTop:2}}>STRATEGIC INTELLIGENCE</div>
+        <div style={{fontSize:11,color:'rgba(0,180,100,.42)',letterSpacing:2,marginTop:1}}>Naif Alsalem</div>
       </div>
-      <div style={{display:"flex",alignItems:"center",gap:20}}>
-        <div style={{fontSize:10,color:"rgba(0,200,120,.4)",marginTop:3,textAlign:"right"}}>{lastScan}</div>
-        <div style={{display:"flex",alignItems:"center",gap:7,paddingLeft:16,borderLeft:"1px solid rgba(0,200,120,.2)"}}>
-          <div className="live-dot" style={{width:8,height:8,borderRadius:"50%",background:"#00e87a",boxShadow:"0 0 8px #00e87a"}}/>
-          <span style={{fontSize:10,color:"#00e87a",letterSpacing:2}}>LIVE</span>
+      <div style={{display:'flex',alignItems:'center',gap:18}}>
+        <div style={{fontSize:9,color:'rgba(0,200,120,.36)',letterSpacing:1,textAlign:'right'}}>{lastScan}</div>
+        <div style={{display:'flex',alignItems:'center',gap:6,borderLeft:'1px solid rgba(0,200,120,.15)',paddingLeft:16}}>
+          <div className="blink" style={{width:7,height:7,borderRadius:'50%',background:'#00e87a',boxShadow:'0 0 7px #00e87a'}}/>
+          <span style={{fontSize:9,color:'#00e87a',letterSpacing:2}}>LIVE</span>
         </div>
       </div>
     </div>
 
     {/* BODY */}
-    <div style={{flex:1,display:"flex",overflow:"hidden",position:"relative",zIndex:1}}>
+    <div style={{flex:1,display:'flex',overflow:'hidden',zIndex:1}}>
 
-      {/* ── LEFT: THREAT MATRIX + TRENDS ── */}
-      <div style={{width:220,flexShrink:0,borderRight:"1px solid rgba(0,200,120,.1)",display:"flex",flexDirection:"column",background:"rgba(0,8,5,.8)",overflowY:"auto"}}>
-
-        {/* THREAT MATRIX */}
-        <div style={{padding:"18px 16px",borderBottom:"1px solid rgba(0,200,120,.1)"}}>
-          <div style={{fontSize:9,letterSpacing:3,color:"rgba(0,200,120,.38)",marginBottom:16}}>THREAT MATRIX</div>
-          {[{l:"CRITICAL / HIGH",n:hi,c:"#ff3c3c"},{l:"ADVISORY / MEDIUM",n:me,c:"#ffb400"},{l:"MONITOR / LOW",n:lo,c:"#00c878"}].map(s=>(
-            <div key={s.l} style={{marginBottom:14}}>
-              <div style={{fontSize:9,letterSpacing:1,color:s.c,opacity:.8,marginBottom:4}}>{s.l}</div>
-              <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:34,fontWeight:900,color:s.c,textShadow:`0 0 18px ${s.c}70`,lineHeight:1}}>{s.n}</div>
+      {/* LEFT PANEL */}
+      <div style={{width:210,flexShrink:0,borderRight:'1px solid rgba(0,200,120,.1)',background:'rgba(0,7,5,.8)',display:'flex',flexDirection:'column',overflowY:'auto'}}>
+        <div style={{padding:'16px 14px',borderBottom:'1px solid rgba(0,200,120,.08)'}}>
+          <div style={{fontSize:9,letterSpacing:3,color:'rgba(0,200,120,.35)',marginBottom:14}}>THREAT MATRIX</div>
+          {[['CRITICAL / HIGH',hi,'#ff4040'],['ADVISORY / MEDIUM',me,'#ffaa00'],['MONITOR / LOW',lo,'#00c878']].map(([l,n,c])=>(
+            <div key={l} style={{marginBottom:14}}>
+              <div style={{fontSize:9,color:c,opacity:.8,marginBottom:2}}>{l}</div>
+              <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:30,fontWeight:900,color:c,textShadow:'0 0 14px '+c+'60',lineHeight:1}}>{n}</div>
             </div>
           ))}
         </div>
-
-        {/* NARRATIVE SHIFT INDEX */}
-        <div style={{padding:"16px 16px",flex:1}}>
-          <div style={{fontSize:9,letterSpacing:3,color:"rgba(0,200,120,.38)",marginBottom:14}}>NARRATIVE SHIFT</div>
-          {TRENDS.map((n,i)=>(
-            <div key={i} style={{marginBottom:14}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                <span style={{fontSize:10,color:"rgba(200,230,210,.65)"}}>{n.label}</span>
-                <span style={{fontSize:10,color:RC(n.risk),fontWeight:600}}>{n.dir==="up"?"^":"v"} {n.trend}</span>
+        <div style={{padding:'14px 14px',flex:1}}>
+          <div style={{fontSize:9,letterSpacing:3,color:'rgba(0,200,120,.35)',marginBottom:14}}>NARRATIVE SHIFT</div>
+          {trends.map((n,i)=>(
+            <div key={i} style={{marginBottom:12}}>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+                <span style={{fontSize:9,color:'rgba(180,220,200,.62)'}}>{n.label}</span>
+                <span style={{fontSize:9,color:RC(n.dynRisk),fontWeight:700}}>{n.dir==='up'?'^':n.dir==='down'?'v':'-'} {n.display}</span>
               </div>
-              <div style={{height:3,background:"rgba(0,200,120,.07)",borderRadius:2}}>
-                <div style={{height:"100%",width:`${Math.abs(parseInt(n.trend))}%`,background:RC(n.risk),borderRadius:2,boxShadow:`0 0 5px ${RC(n.risk)}70`}}/>
+              <div style={{height:2,background:'rgba(0,200,120,.07)',borderRadius:1}}>
+                <div style={{height:'100%',width:Math.min(n.pct,100)+'%',background:RC(n.dynRisk),borderRadius:1,transition:'width .6s ease'}}/>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── CENTER: RADAR HERO ── */}
-      <div style={{width:400,flexShrink:0,borderRight:"1px solid rgba(0,200,120,.1)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"radial-gradient(ellipse at center,rgba(0,50,25,.5) 0%,rgba(0,8,5,.9) 70%)",position:"relative",overflow:"hidden"}}>
-
-        {/* Decorative rings behind radar */}
-        <div style={{position:"absolute",width:440,height:440,borderRadius:"50%",border:"1px solid rgba(0,200,120,.04)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",pointerEvents:"none"}}/>
-        <div style={{position:"absolute",width:500,height:500,borderRadius:"50%",border:"1px solid rgba(0,200,120,.03)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",pointerEvents:"none"}}/>
-
-        <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",width:"100%",padding:"0 20px"}}>
-          <Radar size={340} alerts={filtered}/>
-
-          {/* Signal count below radar */}
-          <div style={{marginTop:14,textAlign:"center"}}>
-            <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:28,fontWeight:900,color:"#00e87a",textShadow:"0 0 20px rgba(0,232,122,.5)",lineHeight:1}}>
-              {filtered.length}
+      {/* CENTER - RADAR */}
+      <div style={{width:380,flexShrink:0,borderRight:'1px solid rgba(0,200,120,.1)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,rgba(0,50,28,.45) 0%,rgba(0,5,3,.9) 70%)',position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',width:420,height:420,borderRadius:'50%',border:'1px solid rgba(0,200,120,.04)',pointerEvents:'none'}}/>
+        <div style={{position:'absolute',width:480,height:480,borderRadius:'50%',border:'1px solid rgba(0,200,120,.025)',pointerEvents:'none'}}/>
+        <div style={{display:'flex',flexDirection:'column',alignItems:'center',width:'100%',padding:'0 20px',zIndex:1}}>
+          <Radar alerts={filtered} size={300}/>
+          <div style={{marginTop:14,textAlign:'center'}}>
+            <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:34,fontWeight:900,color:'#00e87a',textShadow:'0 0 20px rgba(0,232,122,.5)',lineHeight:1}}>{alerts.length}</div>
+            <div style={{fontSize:9,letterSpacing:3,color:'rgba(0,200,120,.42)',marginTop:3}}>SIGNALS ON RADAR</div>
+            <div style={{fontSize:8,letterSpacing:1.5,color:'rgba(0,200,120,.28)',marginTop:2}}>
+              {totalFetched>0?totalFetched.toLocaleString()+' FETCHED':'AWAITING SCAN'}{scanCount>0?' - RUN #'+scanCount:''}
             </div>
-            <div style={{fontSize:9,letterSpacing:3,color:"rgba(0,200,120,.45)",marginTop:3}}>
-              SIGNAL{filtered.length!==1?"S":""} ON RADAR
-            </div>
-            <div style={{fontSize:8,letterSpacing:2,color:"rgba(0,200,120,.28)",marginTop:2}}>
-              {sourcesScanned.toLocaleString()} SOURCES SCANNED{scanCount>0?` · RUN #${scanCount+1}`:""}
-            </div>
-            {scanCount>0&&<div style={{marginTop:5,padding:"2px 10px",fontSize:8,letterSpacing:2,
-              background:isLive?"rgba(0,200,120,.12)":"rgba(255,180,0,.1)",
-              border:`1px solid ${isLive?"rgba(0,200,120,.3)":"rgba(255,180,0,.3)"}`,
-              color:isLive?"#00c878":"#ffb400",borderRadius:8}}>
-              {isLive?"* LIVE DATA":"O CACHED DATA"}
-            </div>}
           </div>
-
-          {/* Scan button */}
-          <button className="btn-green" onClick={()=>runScan()} disabled={scanning}
-            style={{marginTop:18,padding:"12px 0",fontFamily:FF,fontSize:12,letterSpacing:2,fontWeight:600,
-              background:scanning?"rgba(0,80,45,.3)":"rgba(0,200,120,.1)",
-              border:"1px solid rgba(0,200,120,.35)",color:scanning?"rgba(0,200,120,.45)":"#00e87a",
-              borderRadius:2,width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:9,
-              cursor:scanning?"not-allowed":"pointer",boxShadow:scanning?"none":"0 0 20px rgba(0,200,120,.08)"}}>
-            {scanning?<>SCANNING... {scanMsg}</>:<>RUN NEW SCAN</>}
+          {scanCount>0&&(
+            <div style={{marginTop:6,padding:'2px 12px',fontSize:8,letterSpacing:2,background:isLive?'rgba(0,200,120,.1)':'rgba(255,170,0,.1)',border:'1px solid '+(isLive?'rgba(0,200,120,.3)':'rgba(255,170,0,.3)'),color:isLive?'#00c878':'#ffaa00',borderRadius:10}}>
+              {isLive?'LIVE DATA':alerts.length>0?'CURATED INTELLIGENCE':'NO DATA'}
+            </div>
+          )}
+          <button onClick={runScan} disabled={scanning} className="btn"
+            style={{marginTop:16,width:'100%',padding:'12px 0',background:scanning?'rgba(0,60,35,.3)':'rgba(0,200,120,.1)',border:'1px solid '+(scanning?'rgba(0,200,120,.2)':'rgba(0,200,120,.4)'),color:scanning?'rgba(0,200,120,.4)':'#00e87a',fontSize:12,letterSpacing:2,fontWeight:700,borderRadius:2,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
+            {scanning?React.createElement('span',{className:'spin-anim',style:{marginRight:6}},'+'):null}
+            {scanning?scanMsg:'RUN NEW SCAN'}
           </button>
-
-          {/* Risk legend */}
-          <div style={{display:"flex",gap:16,marginTop:14}}>
-            {[["High","#ff3c3c"],["Medium","#ffb400"],["Low","#00c878"]].map(([l,c])=>(
-              <div key={l} style={{display:"flex",alignItems:"center",gap:5}}>
-                <div style={{width:7,height:7,borderRadius:"50%",background:c,boxShadow:`0 0 6px ${c}`}}/>
-                <span style={{fontSize:9,color:"rgba(200,230,210,.5)",letterSpacing:1}}>{l}</span>
+          <div style={{display:'flex',gap:16,marginTop:12}}>
+            {[['High','#ff4040'],['Medium','#ffaa00'],['Low','#00c878']].map(([l,c])=>(
+              <div key={l} style={{display:'flex',alignItems:'center',gap:5}}>
+                <div style={{width:6,height:6,borderRadius:'50%',background:c}}/>
+                <span style={{fontSize:9,color:'rgba(180,220,200,.5)'}}>{l}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* MAIN PANEL */}
-      <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+      {/* RIGHT PANEL */}
+      <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
 
-        {/* CONTROLS */}
-        <div style={{padding:"12px 20px",borderBottom:"1px solid rgba(0,200,120,.1)",background:"rgba(0,8,5,.6)",flexShrink:0}}>
-          <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:10}}>
-            <div style={{position:"relative",flex:1}}>
-              <input
-                type="text"
-                value={search}
-                onChange={e=>handleSearch(e.target.value)}
+        {/* Controls */}
+        <div style={{padding:'10px 18px',borderBottom:'1px solid rgba(0,200,120,.08)',background:'rgba(0,5,3,.6)',flexShrink:0}}>
+          <div style={{display:'flex',gap:8,marginBottom:10,alignItems:'center'}}>
+            <div style={{position:'relative',flex:1}}>
+              <input value={search} onChange={e=>{setSearch(e.target.value);if(tab==='brief')setTab('feed');}}
                 placeholder="Search intelligence feed..."
-                style={{width:"100%",background:"rgba(0,35,22,.5)",border:"1px solid rgba(0,200,120,.18)",borderRadius:2,padding:"8px 32px 8px 32px",color:"#c8e6d4",fontSize:13,fontFamily:FF,transition:"border .2s"}}/>
-              <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",color:"rgba(0,200,120,.45)",fontSize:15,pointerEvents:"none"}}>/</span>
-              {search&&<span onClick={()=>setSearch("")} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",color:"rgba(0,200,120,.5)",fontSize:13,cursor:"pointer",lineHeight:1}}>x</span>}
+                style={{width:'100%',background:'rgba(0,30,20,.5)',border:'1px solid rgba(0,200,120,.18)',borderRadius:2,padding:'8px 28px 8px 10px',color:'#b8dcc8',fontSize:12,transition:'border .2s'}}/>
+              {search&&<span onClick={()=>setSearch('')} style={{position:'absolute',right:8,top:'50%',transform:'translateY(-50%)',color:'rgba(0,200,120,.5)',cursor:'pointer',fontSize:12}}>x</span>}
             </div>
-            <button className="btn-green" onClick={()=>setRecentOnly(r=>!r)}
-              style={{padding:"9px 14px",fontSize:11,letterSpacing:1.5,fontWeight:600,
-                background:recentOnly?"rgba(0,232,122,.18)":"rgba(0,200,120,.06)",
-                border:`1px solid ${recentOnly?"#00e87a":"rgba(0,200,120,.25)"}`,
-                color:recentOnly?"#00e87a":"rgba(0,200,120,.5)",
-                borderRadius:2,fontFamily:FF,whiteSpace:"nowrap",flexShrink:0}}>
-              {recentOnly?"@ RECENT":"O ALL TIME"}
+            <button onClick={()=>setRecentOnly(r=>!r)} className="btn"
+              style={{padding:'8px 12px',fontSize:10,letterSpacing:1.5,background:recentOnly?'rgba(0,200,120,.15)':'transparent',border:'1px solid '+(recentOnly?'#00c878':'rgba(0,200,120,.2)'),color:recentOnly?'#00c878':'rgba(0,200,120,.42)',borderRadius:2,whiteSpace:'nowrap'}}>
+              {recentOnly?'RECENT':'ALL TIME'}
             </button>
-            <button className="btn-green" onClick={()=>makePDF(filtered,keywords)}
-              style={{padding:"9px 20px",fontSize:12,letterSpacing:1.5,fontWeight:600,background:"rgba(255,80,80,.1)",border:"1px solid rgba(255,80,80,.35)",color:"#ff8080",borderRadius:2,fontFamily:FF,display:"flex",alignItems:"center",gap:6,whiteSpace:"nowrap"}}>
-              v&nbsp;PDF
+            <button onClick={()=>makePDF(filtered,keywords,trends)} className="btn"
+              style={{padding:'8px 16px',fontSize:10,letterSpacing:1.5,background:'rgba(255,60,60,.1)',border:'1px solid rgba(255,60,60,.35)',color:'#ff7070',borderRadius:2,fontWeight:700}}>
+              PDF
             </button>
           </div>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-            {["All","Narrative","Policy","Negotiation","Finance","Alliance","Strategic"].map(c=>(
-              <button key={c} className="chip-btn" onClick={()=>setFilter(c)}
-                style={{padding:"5px 12px",fontSize:10,letterSpacing:1.5,background:filter===c?"rgba(0,200,120,.15)":"transparent",border:`1px solid ${filter===c?"#00c878":"rgba(0,200,120,.2)"}`,color:filter===c?"#00c878":"rgba(0,200,120,.45)",borderRadius:1,fontFamily:FF}}>
+          <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+            {['All','Narrative','Policy','Negotiation','Finance','Alliance','Strategic'].map(c=>(
+              <button key={c} onClick={()=>setFilter(c)} className="btn"
+                style={{padding:'4px 11px',fontSize:9,letterSpacing:1.5,background:filter===c?'rgba(0,200,120,.15)':'transparent',border:'1px solid '+(filter===c?'#00c878':'rgba(0,200,120,.18)'),color:filter===c?'#00c878':'rgba(0,200,120,.42)',borderRadius:1}}>
                 {c.toUpperCase()}
               </button>
             ))}
           </div>
         </div>
 
-        {/* KEYWORD WATCH BAR */}
-        <div style={{padding:"10px 20px",borderBottom:"1px solid rgba(0,200,120,.1)",background:"rgba(0,5,3,.55)",flexShrink:0}}>
-          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-            <span style={{fontSize:10,letterSpacing:2,color:"rgba(0,200,120,.5)",flexShrink:0}}># KEYWORD WATCH:</span>
-            <div style={{display:"flex",gap:5,flexWrap:"wrap",flex:1,alignItems:"center"}}>
-              {keywords.map(kw=>(
-                <span key={kw} style={{padding:"3px 10px",fontSize:11,background:"rgba(0,180,100,.12)",border:"1px solid rgba(0,180,100,.25)",color:"#00c878",borderRadius:10,display:"inline-flex",alignItems:"center",gap:5}}>
-                  {kw}
-                  <span onClick={()=>setKeywords(keywords.filter(k=>k!==kw))} style={{cursor:"pointer",color:"rgba(0,200,120,.5)",fontSize:12}}>x</span>
-                </span>
-              ))}
-              <input value={newKw} onChange={e=>setNewKw(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addKw()}
-                placeholder="+ add keyword"
-                style={{background:"transparent",border:"1px dashed rgba(0,200,120,.22)",borderRadius:10,padding:"3px 12px",color:"#c8e6d4",fontSize:11,fontFamily:FF,width:140}}/>
-            </div>
-            <button className="btn-green" onClick={scanKw}
-              style={{padding:"6px 16px",fontSize:11,letterSpacing:1.5,background:"rgba(0,200,120,.1)",border:"1px solid rgba(0,200,120,.3)",color:"#00e87a",borderRadius:2,fontFamily:FF,flexShrink:0,fontWeight:600}}>
-              S SCAN
-            </button>
-          </div>
+        {/* Keyword bar */}
+        <div style={{padding:'8px 18px',borderBottom:'1px solid rgba(0,200,120,.08)',background:'rgba(0,4,2,.55)',flexShrink:0,display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+          <span style={{fontSize:9,letterSpacing:2,color:'rgba(0,200,120,.45)',flexShrink:0}}>KEYWORD WATCH:</span>
+          {keywords.map(kw=>(
+            <span key={kw} style={{padding:'2px 9px',fontSize:10,background:'rgba(0,180,100,.1)',border:'1px solid rgba(0,180,100,.22)',color:'#00c878',borderRadius:10,display:'inline-flex',alignItems:'center',gap:4}}>
+              {kw}
+              <span onClick={()=>setKeywords(keywords.filter(k=>k!==kw))} style={{cursor:'pointer',color:'rgba(0,200,120,.45)',fontSize:11,lineHeight:1}}>x</span>
+            </span>
+          ))}
+          <input value={newKw} onChange={e=>setNewKw(e.target.value)}
+            onKeyDown={e=>e.key==='Enter'&&addKw()}
+            placeholder="+ add keyword"
+            style={{background:'transparent',border:'1px dashed rgba(0,200,120,.2)',borderRadius:10,padding:'2px 10px',color:'#b8dcc8',fontSize:10,width:130}}/>
+          <button onClick={doKwScan} className="btn"
+            style={{padding:'4px 14px',fontSize:9,letterSpacing:1.5,background:'rgba(0,200,120,.08)',border:'1px solid rgba(0,200,120,.28)',color:'#00e87a',borderRadius:2,fontWeight:700,marginLeft:'auto'}}>
+            SCAN
+          </button>
         </div>
 
-        {/* TABS */}
-        <div style={{display:"flex",borderBottom:"1px solid rgba(0,200,120,.1)",padding:"0 20px",background:"rgba(0,5,3,.55)",flexShrink:0}}>
-          {[{k:"alerts",l:"INTELLIGENCE FEED"},{k:"keywords",l:`KEYWORD RESULTS${kwResults.length?" ("+kwResults.length+")":""}`},{k:"strategic",l:"STRATEGIC BRIEF"}].map(t=>(
-            <button key={t.k} onClick={()=>setTab(t.k)}
-              style={{padding:"11px 18px",fontSize:11,letterSpacing:2,background:"transparent",border:"none",borderBottom:tab===t.k?"2px solid #00e87a":"2px solid transparent",color:tab===t.k?"#00e87a":"rgba(0,200,120,.38)",cursor:"pointer",fontFamily:FF,transition:"all .2s"}}>
-              {t.l}
+        {/* Tabs */}
+        <div style={{display:'flex',borderBottom:'1px solid rgba(0,200,120,.08)',padding:'0 18px',background:'rgba(0,3,2,.5)',flexShrink:0}}>
+          {[['feed','INTELLIGENCE FEED'],['keywords','KEYWORD RESULTS'+(kwResults.length?' ('+kwResults.length+')':'')],['brief','STRATEGIC BRIEF']].map(([k,l])=>(
+            <button key={k} onClick={()=>setTab(k)} className="btn"
+              style={{padding:'9px 16px',fontSize:9,letterSpacing:2,background:'transparent',border:'none',borderBottom:tab===k?'2px solid #00e87a':'2px solid transparent',color:tab===k?'#00e87a':'rgba(0,200,120,.35)',fontWeight:tab===k?700:400}}>
+              {l}
             </button>
           ))}
         </div>
 
-        {/* CONTENT */}
-        <div style={{flex:1,overflowY:"auto",padding:"14px 20px",display:"flex",gap:14}}>
+        {/* Content area */}
+        <div style={{flex:1,overflowY:'auto',padding:'12px 18px',display:'flex',gap:12}}>
 
-          {/* ── ALERTS ── */}
-          {tab==="alerts"&&<>
-            <div style={{flex:1}}>
-              {filtered.length===0&&<div style={{textAlign:"center",color:"rgba(0,200,120,.3)",marginTop:60,fontSize:13,letterSpacing:2}}>NO SIGNALS DETECTED</div>}
-              {filtered.map((a,i)=>(
-                <div key={a.id} className="alert-card" onClick={()=>setSel(sel?.id===a.id?null:a)}
-                  style={{padding:"14px 16px",marginBottom:7,background:sel?.id===a.id?"rgba(0,200,120,.08)":"rgba(0,14,8,.6)",border:`1px solid ${sel?.id===a.id?"rgba(0,200,120,.3)":"rgba(0,200,120,.08)"}`,borderLeft:`4px solid ${RC(a.risk)}`,cursor:"pointer",animationDelay:`${i*28}ms`}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:7}}>
-                    <div style={{fontSize:13,color:"#dff0e8",fontWeight:600,flex:1,marginRight:10,lineHeight:1.45}}>{a.title}</div>
-                    <div style={{display:"flex",gap:5,flexShrink:0,alignItems:"center"}}>
-                      {(()=>{const f=freshnessLabel(daysOld(a.date));return <span style={{padding:"2px 6px",fontSize:8,letterSpacing:1.5,background:`${f.color}18`,border:`1px solid ${f.color}50`,color:f.color,borderRadius:1,fontWeight:700}}>{f.label}</span>;})()}
-                      <span style={{padding:"3px 8px",fontSize:10,letterSpacing:1.5,background:RB(a.risk),border:`1px solid ${RC(a.risk)}40`,color:RC(a.risk),borderRadius:1,fontWeight:600}}>{a.risk.toUpperCase()}</span>
-                      <span style={{padding:"3px 8px",fontSize:10,letterSpacing:1,background:"rgba(0,200,120,.05)",border:"1px solid rgba(0,200,120,.14)",color:"rgba(0,200,120,.6)",borderRadius:1}}>{a.category}</span>
-                    </div>
+          {/* FEED TAB */}
+          {tab==='feed'&&(
+            <>
+              <div style={{flex:1}}>
+                {filtered.length===0&&(
+                  <div style={{textAlign:'center',marginTop:80,color:'rgba(0,200,120,.28)',fontSize:11,letterSpacing:2,lineHeight:2.5}}>
+                    {alerts.length===0?'PRESS RUN NEW SCAN TO LOAD LIVE SIGNALS':'NO SIGNALS MATCH CURRENT FILTER'}
                   </div>
-                  <div style={{fontSize:12,color:"rgba(200,230,210,.55)",lineHeight:1.75}}>{a.summary}</div>
-                  <div style={{marginTop:8,display:"flex",justifyContent:"space-between"}}>
-                    <span style={{fontSize:11,color:"rgba(0,200,120,.4)",letterSpacing:1}}>> {a.source}</span>
-                    <span style={{fontSize:11,color:"rgba(0,200,120,.28)"}}>{a.date}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {sel&&(
-              <div style={{width:295,flexShrink:0,background:"rgba(0,11,7,.92)",border:"1px solid rgba(0,200,120,.2)",borderRadius:2,padding:18,height:"fit-content",position:"sticky",top:0}}>
-                <div style={{fontSize:9,letterSpacing:3,color:"rgba(0,200,120,.38)",marginBottom:12}}>SIGNAL DETAIL</div>
-                <div style={{fontSize:13,color:"#e0f0e8",fontWeight:600,marginBottom:10,lineHeight:1.6}}>{sel.title}</div>
-                <div style={{padding:"8px 10px",marginBottom:12,background:RB(sel.risk),border:`1px solid ${RC(sel.risk)}30`,borderRadius:1}}>
-                  <span style={{fontSize:10,letterSpacing:2,color:RC(sel.risk),fontWeight:600}}>* RISK: {sel.risk.toUpperCase()}</span>
-                </div>
-                <div style={{fontSize:12,color:"rgba(200,230,210,.7)",lineHeight:1.8,marginBottom:12}}>{sel.summary}</div>
-                <div style={{borderTop:"1px solid rgba(0,200,120,.1)",paddingTop:10,marginBottom:12}}>
-                  {[["SOURCE",sel.source],["CATEGORY",sel.category],["DATE",sel.date]].map(([k,v])=>(
-                    <div key={k} style={{display:"flex",justifyContent:"space-between",marginBottom:7}}>
-                      <span style={{fontSize:10,letterSpacing:1.5,color:"rgba(0,200,120,.38)"}}>{k}</span>
-                      <span style={{fontSize:11,color:"rgba(200,230,210,.7)"}}>{v}</span>
-                    </div>
-                  ))}
-                </div>
-                {/* Link Verification Block */}
-                {(()=>{
-                  const st=linkStatus[sel.id];
-                  const stIcon=st==="checking"?"RUN NEW SCAN":st==="ok"?"OK":st==="fail"?"X":st==="timeout"?"!":"S";
-                  const stLabel=st==="checking"?"VERIFYING...":st==="ok"?"LINK VERIFIED":st==="fail"?"LINK UNREACHABLE":st==="timeout"?"TIMED OUT":"NOT CHECKED";
-                  const stColor=st==="ok"?"#00c878":st==="fail"?"#ff3c3c":st==="timeout"?"#ffb400":st==="checking"?"#ffb400":"rgba(0,200,120,.4)";
+                )}
+                {filtered.map((a,i)=>{
+                  const f=freshness(daysOld(a.date));
                   return(
-                    <div style={{marginBottom:6}}>
-                      {/* Status bar */}
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 10px",background:"rgba(0,20,12,.6)",border:`1px solid ${stColor}30`,borderBottom:"none",borderRadius:"1px 1px 0 0"}}>
-                        <span style={{fontSize:9,letterSpacing:2,color:stColor,display:"flex",alignItems:"center",gap:5}}>
-                          <span style={st==="checking"?{display:"inline-block",animation:"spin .7s linear infinite"}:{}}>{stIcon}</span>
-                          {stLabel}
-                        </span>
-                        <button onClick={()=>verifyLink(sel.id,sel.link)} disabled={st==="checking"}
-                          style={{fontSize:8,letterSpacing:1,background:"transparent",border:`1px solid ${stColor}40`,color:stColor,padding:"2px 7px",cursor:"pointer",fontFamily:FF,borderRadius:1,opacity:st==="checking"?.5:1}}>
-                          RE-CHECK
-                        </button>
-                      </div>
-                      {/* Link */}
-                      <a href={sel.link} target="_blank" rel="noopener noreferrer" style={{display:"block",textDecoration:"none"}}>
-                        <div style={{padding:"8px 10px",background:"rgba(0,200,120,.07)",border:`1px solid rgba(0,200,120,.22)`,borderBottom:"none"}}>
-                          <div style={{fontSize:9,color:"rgba(0,200,120,.5)",letterSpacing:1,marginBottom:3}}>-> VIEW SOURCE</div>
-                          <div style={{fontSize:10,color:"#00c878",fontWeight:600}}>{sel.linkLabel}</div>
+                    <div key={a.id} className="card"
+                      onClick={()=>setSel(sel?.id===a.id?null:a)}
+                      style={{padding:'12px 14px',marginBottom:6,background:sel?.id===a.id?'rgba(0,200,120,.08)':'rgba(0,12,8,.6)',border:'1px solid '+(sel?.id===a.id?'rgba(0,200,120,.28)':'rgba(0,200,120,.07)'),borderLeft:'3px solid '+RC(a.risk),animationDelay:i*15+'ms'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:5,gap:8}}>
+                        <div style={{fontSize:12,color:'#d8f0e4',fontWeight:700,flex:1,lineHeight:1.4}}>{a.title}</div>
+                        <div style={{display:'flex',gap:4,flexShrink:0,alignItems:'center',flexWrap:'wrap',justifyContent:'flex-end'}}>
+                          <span style={{padding:'1px 6px',fontSize:8,background:f.color+'18',border:'1px solid '+f.color+'50',color:f.color,borderRadius:1,fontWeight:700}}>{f.label}</span>
+                          <span style={{padding:'2px 7px',fontSize:9,background:RB(a.risk),border:'1px solid '+RC(a.risk)+'40',color:RC(a.risk),borderRadius:1,fontWeight:700}}>{a.risk.toUpperCase()}</span>
+                          <span style={{padding:'2px 7px',fontSize:9,background:'rgba(0,200,120,.05)',border:'1px solid rgba(0,200,120,.12)',color:'rgba(0,200,120,.55)',borderRadius:1}}>{a.category}</span>
                         </div>
-                      </a>
-                      {/* Section note */}
-                      <div style={{padding:"7px 10px",background:"rgba(0,80,45,.08)",border:"1px solid rgba(0,200,120,.14)",borderRadius:"0 0 1px 1px"}}>
-                        <div style={{fontSize:9,color:"rgba(0,200,120,.5)",lineHeight:1.5}}>>> {sel.linkNote}</div>
                       </div>
-                      {st==="ok"&&<div style={{fontSize:8,color:"rgba(0,200,120,.35)",marginTop:3,letterSpacing:.5}}>* Domain reachable via HEAD check. Exact page availability may vary due to CORS policy.</div>}
-                      {st==="fail"&&<div style={{fontSize:8,color:"rgba(255,60,60,.5)",marginTop:3,letterSpacing:.5}}>* Domain unreachable. Link may be broken or blocked.</div>}
+                      <div style={{fontSize:11,color:'rgba(180,220,200,.5)',lineHeight:1.7}}>{a.summary.slice(0,200)}{a.summary.length>200?'...':''}</div>
+                      <div style={{marginTop:7,display:'flex',justifyContent:'space-between'}}>
+                        <span style={{fontSize:10,color:'rgba(0,200,120,.38)'}}>- {a.source}</span>
+                        <span style={{fontSize:10,color:'rgba(0,200,120,.25)'}}>{a.date}</span>
+                      </div>
                     </div>
                   );
-                })()}
-                <button onClick={()=>setSel(null)} style={{display:"block",width:"100%",padding:"7px",fontSize:10,letterSpacing:2,background:"transparent",border:"1px solid rgba(0,200,120,.1)",color:"rgba(0,200,120,.38)",cursor:"pointer",fontFamily:FF,borderRadius:1}}>x CLOSE</button>
+                })}
               </div>
-            )}
-          </>}
 
-          {/* ── KEYWORD RESULTS ── */}
-          {tab==="keywords"&&(
+              {/* DETAIL PANEL */}
+              {sel&&(
+                <div style={{width:280,flexShrink:0,background:'rgba(0,10,7,.94)',border:'1px solid rgba(0,200,120,.18)',borderRadius:2,padding:16,position:'sticky',top:0,maxHeight:'calc(100vh - 200px)',overflowY:'auto'}}>
+                  <div style={{fontSize:8,letterSpacing:3,color:'rgba(0,200,120,.35)',marginBottom:10}}>SIGNAL DETAIL</div>
+                  <div style={{fontSize:12,color:'#d8f0e4',fontWeight:700,lineHeight:1.55,marginBottom:10}}>{sel.title}</div>
+                  <div style={{padding:'7px 10px',marginBottom:10,background:RB(sel.risk),border:'1px solid '+RC(sel.risk)+'30',borderRadius:1}}>
+                    <span style={{fontSize:9,letterSpacing:2,color:RC(sel.risk),fontWeight:700}}>RISK: {sel.risk.toUpperCase()}</span>
+                  </div>
+                  <div style={{fontSize:11,color:'rgba(180,220,200,.68)',lineHeight:1.8,marginBottom:12}}>{sel.summary}</div>
+                  <div style={{borderTop:'1px solid rgba(0,200,120,.1)',paddingTop:10,marginBottom:12}}>
+                    {[['SOURCE',sel.source],['CATEGORY',sel.category],['DATE',sel.date]].map(([k,v])=>(
+                      <div key={k} style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+                        <span style={{fontSize:9,color:'rgba(0,200,120,.35)',letterSpacing:1.5}}>{k}</span>
+                        <span style={{fontSize:10,color:'rgba(180,220,200,.68)'}}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Link verification */}
+                  {(()=>{
+                    const st=linkSt[sel.id];
+                    const stColor=st==='ok'?'#00c878':st==='fail'?'#ff4040':st==='timeout'?'#ffaa00':'rgba(0,200,120,.38)';
+                    const stLabel=st==='checking'?'CHECKING...':st==='ok'?'VERIFIED':st==='fail'?'UNREACHABLE':st==='timeout'?'TIMED OUT':'NOT CHECKED';
+                    return(
+                      <div style={{marginBottom:8}}>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 8px',background:'rgba(0,15,10,.6)',border:'1px solid '+stColor+'25',borderBottom:'none',borderRadius:'2px 2px 0 0'}}>
+                          <span style={{fontSize:8,letterSpacing:1.5,color:stColor,display:'flex',alignItems:'center',gap:4}}>
+                            {st==='checking'&&React.createElement('span',{className:'spin-anim'},'+')}{' '}{stLabel}
+                          </span>
+                          <button onClick={()=>verifyLink(sel.id,sel.link)} className="btn" disabled={st==='checking'}
+                            style={{fontSize:7,letterSpacing:1,background:'transparent',border:'1px solid '+stColor+'35',color:stColor,padding:'1px 6px',borderRadius:1}}>
+                            CHECK
+                          </button>
+                        </div>
+                        <a href={sel.link} target="_blank" rel="noopener noreferrer" style={{display:'block',textDecoration:'none'}}>
+                          <div style={{padding:'7px 8px',background:'rgba(0,200,120,.06)',border:'1px solid rgba(0,200,120,.2)',borderBottom:'none'}}>
+                            <div style={{fontSize:8,color:'rgba(0,200,120,.45)',marginBottom:2}}>VIEW SOURCE</div>
+                            <div style={{fontSize:10,color:'#00c878',fontWeight:600}}>{sel.linkLabel}</div>
+                          </div>
+                          <div style={{padding:'5px 8px',background:'rgba(0,70,40,.08)',border:'1px solid rgba(0,200,120,.12)',borderRadius:'0 0 2px 2px'}}>
+                            <div style={{fontSize:9,color:'rgba(0,200,120,.45)'}}>{sel.linkNote}</div>
+                          </div>
+                        </a>
+                      </div>
+                    );
+                  })()}
+                  <button onClick={()=>setSel(null)} className="btn"
+                    style={{display:'block',width:'100%',padding:'6px',fontSize:9,letterSpacing:2,background:'transparent',border:'1px solid rgba(0,200,120,.1)',color:'rgba(0,200,120,.35)',borderRadius:1,marginTop:4}}>
+                    CLOSE
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* KEYWORDS TAB */}
+          {tab==='keywords'&&(
             <div style={{flex:1}}>
-              <div style={{fontSize:10,letterSpacing:3,color:"rgba(0,200,120,.4)",marginBottom:14}}>
-                KEYWORD SCAN RESULTS  -  {filteredKw.length} SIGNAL{filteredKw.length!==1?"S":""} MATCHED{search?` · filtered by "${search}"`:""}
+              <div style={{fontSize:9,letterSpacing:3,color:'rgba(0,200,120,.38)',marginBottom:12}}>
+                KEYWORD SCAN - {kwResults.length} SIGNAL{kwResults.length!==1?'S':''} MATCHED
               </div>
-              <div style={{marginBottom:14,padding:"10px 14px",background:"rgba(0,18,10,.55)",border:"1px solid rgba(0,200,120,.12)",borderRadius:2,fontSize:12,color:"rgba(0,200,120,.6)",display:"flex",flexWrap:"wrap",gap:6,alignItems:"center"}}>
-                <span style={{color:"rgba(0,200,120,.45)"}}>Watching:</span>
-                {keywords.map(kw=><span key={kw} style={{padding:"2px 9px",background:"rgba(0,180,100,.12)",border:"1px solid rgba(0,180,100,.22)",color:"#00c878",borderRadius:8,fontSize:11}}>{kw}</span>)}
+              <div style={{marginBottom:12,padding:'8px 12px',background:'rgba(0,15,10,.5)',border:'1px solid rgba(0,200,120,.1)',borderRadius:2,display:'flex',flexWrap:'wrap',gap:5,alignItems:'center'}}>
+                <span style={{fontSize:9,color:'rgba(0,200,120,.4)'}}>Watching:</span>
+                {keywords.map(kw=>(
+                  <span key={kw} style={{padding:'1px 8px',background:'rgba(0,180,100,.1)',border:'1px solid rgba(0,180,100,.2)',color:'#00c878',borderRadius:8,fontSize:10}}>{kw}</span>
+                ))}
               </div>
-              {filteredKw.length===0&&<div style={{textAlign:"center",color:"rgba(0,200,120,.3)",marginTop:50,fontSize:13,letterSpacing:2}}>{search?"NO MATCHES FOR SEARCH QUERY":"NO MATCHES  -  ADD MORE KEYWORDS"}</div>}
-              {filteredKw.map((a,i)=>{
-                const matched=keywords.filter(kw=>a.title.toLowerCase().includes(kw.toLowerCase())||a.summary.toLowerCase().includes(kw.toLowerCase())||a.kw.some(ak=>ak.toLowerCase().includes(kw.toLowerCase())));
+              {kwResults.length===0&&(
+                <div style={{textAlign:'center',color:'rgba(0,200,120,.28)',marginTop:50,fontSize:11,letterSpacing:2}}>
+                  {alerts.length===0?'RUN SCAN FIRST THEN SCAN KEYWORDS':'NO KEYWORD MATCHES FOUND'}
+                </div>
+              )}
+              {kwResults.filter(a=>search===''||a.title.toLowerCase().includes(search.toLowerCase())).map((a,i)=>{
+                const matched=keywords.filter(kw=>(a.title+' '+a.summary+(a.kw||[]).join(' ')).toLowerCase().includes(kw.toLowerCase()));
+                const f=freshness(daysOld(a.date));
                 return(
-                  <div key={a.id} className="alert-card"
-                    style={{padding:"14px 16px",marginBottom:7,background:"rgba(0,18,10,.6)",border:`1px solid rgba(0,200,120,.1)`,borderLeft:`4px solid ${RC(a.risk)}`,animationDelay:`${i*28}ms`}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:7}}>
-                      <div style={{fontSize:13,color:"#dff0e8",fontWeight:600,flex:1,marginRight:10}}>{a.title}</div>
-                      <span style={{padding:"3px 8px",fontSize:10,background:RB(a.risk),border:`1px solid ${RC(a.risk)}40`,color:RC(a.risk),borderRadius:1,fontWeight:600}}>{a.risk.toUpperCase()}</span>
+                  <div key={a.id} className="card"
+                    style={{padding:'12px 14px',marginBottom:6,background:'rgba(0,12,8,.6)',border:'1px solid rgba(0,200,120,.08)',borderLeft:'3px solid '+RC(a.risk),animationDelay:i*15+'ms'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:5,gap:8}}>
+                      <div style={{fontSize:12,color:'#d8f0e4',fontWeight:700,flex:1}}>{a.title}</div>
+                      <div style={{display:'flex',gap:4,flexShrink:0}}>
+                        <span style={{padding:'1px 6px',fontSize:8,background:f.color+'18',border:'1px solid '+f.color+'50',color:f.color,borderRadius:1}}>{f.label}</span>
+                        <span style={{padding:'2px 7px',fontSize:9,background:RB(a.risk),border:'1px solid '+RC(a.risk)+'40',color:RC(a.risk),borderRadius:1,fontWeight:700}}>{a.risk.toUpperCase()}</span>
+                      </div>
                     </div>
-                    <div style={{fontSize:12,color:"rgba(200,230,210,.55)",lineHeight:1.75,marginBottom:9}}>{a.summary}</div>
-                    <div style={{display:"flex",gap:5,flexWrap:"wrap",alignItems:"center"}}>
-                      <span style={{fontSize:10,color:"rgba(0,200,120,.4)"}}>MATCHED:</span>
-                      {matched.map(kw=><span key={kw} style={{padding:"2px 9px",fontSize:10,background:"rgba(0,230,130,.12)",border:"1px solid rgba(0,230,130,.25)",color:"#00e87a",borderRadius:8}}>{kw}</span>)}
+                    <div style={{fontSize:11,color:'rgba(180,220,200,.5)',lineHeight:1.7,marginBottom:8}}>{a.summary.slice(0,200)}</div>
+                    <div style={{display:'flex',gap:4,flexWrap:'wrap',alignItems:'center'}}>
+                      <span style={{fontSize:9,color:'rgba(0,200,120,.38)'}}>MATCHED:</span>
+                      {matched.map(kw=>(
+                        <span key={kw} style={{padding:'1px 8px',fontSize:9,background:'rgba(0,230,130,.1)',border:'1px solid rgba(0,230,130,.22)',color:'#00e87a',borderRadius:8}}>{kw}</span>
+                      ))}
                     </div>
                   </div>
                 );
@@ -876,24 +738,24 @@ function App(){
             </div>
           )}
 
-          {/* ── STRATEGIC ── */}
-          {tab==="strategic"&&(
+          {/* BRIEF TAB */}
+          {tab==='brief'&&(
             <div style={{flex:1}}>
-              <div style={{fontSize:10,letterSpacing:3,color:"rgba(0,200,120,.4)",marginBottom:16}}>
-                STRATEGIC INTELLIGENCE BRIEF  -  {new Date().toDateString().toUpperCase()}
+              <div style={{fontSize:9,letterSpacing:3,color:'rgba(0,200,120,.38)',marginBottom:14}}>
+                STRATEGIC INTELLIGENCE BRIEF - {new Date().toDateString().toUpperCase()}
               </div>
               {[
-                {t:"Critical Risk Summary",r:"High",c:"Three high-risk signals detected this cycle. The convergence of IPCC AR7 binding language, EU CBAM expansion, and UNFCCC GST ambiguous text creates a compounding threat vector requiring immediate narrative counter-strategy deployment."},
-                {t:"Narrative Vulnerability Assessment",r:"High",c:'"Phase-out" language has surged +18% across monitored sources. CBAM references are up +31%  -  the highest velocity indicator this period. Arab delegations should prepare counter-framing around energy security and just transition.'},
-                {t:"Coalition Opportunity",r:"Low",c:"African nations' new climate debt coalition aligns closely with Arab Group positions on historical responsibility. A coordinated outreach initiative could expand the bloc's influence ahead of COP31."},
-                {t:"Recommended Strategic Actions",r:"Medium",c:"1. Activate diplomatic channels with IPCC bureau contacts regarding AR7 language precision.\n2. Prepare technical rebuttal to IEA Net Zero 2035 demand scenario.\n3. Commission independent equity metric analysis to counter CBAM expansion.\n4. Establish pre-COP31 dialogue with African coalition lead delegations."}
+                {t:'Critical Risk Summary',r:'High',c:hi+' high-risk signals detected this scan cycle. Key threats include phase-out language, CBAM expansion, and ambiguous fossil fuel framing in negotiation texts. Immediate counter-narrative preparation recommended for Arab Group delegations before upcoming sessions.'},
+                {t:'Narrative Vulnerability Assessment',r:'High',c:'Narrative Shift Index reflects live keyword frequency across '+alerts.length+' scanned signals. Topics with upward trends require active diplomatic response. CBAM and net-zero pressure currently represent the highest velocity indicators.'},
+                {t:'Coalition Opportunity',r:'Low',c:'African and developing nation positions increasingly align with Arab Group on historical responsibility and just transition equity. Pre-COP outreach to these blocs could expand the negotiating coalition and strengthen common positions on loss and damage.'},
+                {t:'Recommended Strategic Actions',r:'Medium',c:'1. Monitor CBAM and phase-out language trends across each scan cycle.\n2. Prepare technical rebuttals to IEA oil demand forecasts.\n3. Build coalition around equity and historical responsibility framing.\n4. Leverage Saudi Vision 2030 and CCS investments as positive counter-narratives.\n5. Engage African coalition delegations before COP31.'},
               ].map((s,i)=>(
-                <div key={i} style={{padding:"16px 18px",marginBottom:10,background:"rgba(0,11,7,.65)",border:`1px solid ${RC(s.r)}15`,borderLeft:`4px solid ${RC(s.r)}`,borderRadius:1}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}>
-                    <div style={{fontSize:13,color:"#00e87a",letterSpacing:.8,fontWeight:600}}>{s.t}</div>
-                    <span style={{padding:"3px 9px",fontSize:10,letterSpacing:1.5,background:RB(s.r),color:RC(s.r),border:`1px solid ${RC(s.r)}38`,borderRadius:1,fontWeight:600}}>{s.r.toUpperCase()}</span>
+                <div key={i} style={{padding:'14px 16px',marginBottom:10,background:'rgba(0,10,7,.65)',border:'1px solid '+RC(s.r)+'15',borderLeft:'3px solid '+RC(s.r),borderRadius:1}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
+                    <div style={{fontSize:12,color:'#00e87a',fontWeight:700}}>{s.t}</div>
+                    <span style={{padding:'2px 8px',fontSize:9,background:RB(s.r),color:RC(s.r),border:'1px solid '+RC(s.r)+'35',borderRadius:1,fontWeight:700}}>{s.r.toUpperCase()}</span>
                   </div>
-                  <div style={{fontSize:12,color:"rgba(200,230,210,.72)",lineHeight:1.85,whiteSpace:"pre-line"}}>{s.c}</div>
+                  <div style={{fontSize:11,color:'rgba(180,220,200,.7)',lineHeight:1.85,whiteSpace:'pre-line'}}>{s.c}</div>
                 </div>
               ))}
             </div>
@@ -906,7 +768,15 @@ function App(){
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+<script>
+// Anti-theft
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('keydown',e=>{
+  if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].includes(e.key))||(e.ctrlKey&&e.key==='U'))e.preventDefault();
+});
+window.addEventListener('beforeprint',()=>{document.title='CONFIDENTIAL - Naif Alsalem - Climate Radar';});
 </script>
 </body>
 </html>
