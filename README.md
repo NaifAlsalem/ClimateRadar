@@ -45,15 +45,15 @@ climate-radar/
 
 | Feature | Description |
 |---|---|
-| 🔴 Live Radar Display | Animated radar with blips representing active signals, color-coded by risk level |
-| 📊 Threat Matrix | Real-time count of High / Medium / Low risk signals |
-| 📈 Narrative Shift Index | Tracks directional changes in key climate language trends |
-| 🔍 Keyword Watch | User-defined keyword scanning across all signal sources |
-| ✅ Link Verification | Automatic HEAD-check of every source URL on demand |
-| 📄 PDF Export | One-click export of current filtered signals as a classified report |
-| 🔁 Dynamic Scan | Re-scan simulation with animated sweep and live counter updates |
-| 🕐 Freshness Badges | NEW / RECENT / STALE indicators calculated from today's date |
-| 🔒 PIN Protection | SHA-256 hashed access code with session persistence |
+| Live Radar Display | Animated radar with blips representing active signals, color-coded by risk level |
+| Threat Matrix | Real-time count of High / Medium / Low risk signals |
+| Narrative Shift Index | Tracks directional changes in key climate language trends |
+| Keyword Watch | User-defined keyword scanning across all signal sources |
+| Link Verification | Automatic HEAD-check of every source URL on demand |
+| PDF Export | One-click export of current filtered signals as a classified report |
+| Dynamic Scan | Re-scan simulation with animated sweep and live counter updates |
+| Freshness Badges | NEW / RECENT / STALE indicators calculated from today's date |
+| PIN Protection | SHA-256 hashed access code with session persistence |
 
 ---
 
