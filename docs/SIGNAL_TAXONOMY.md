@@ -56,7 +56,15 @@ Signals that are **informational or favorable** to current positions. May repres
 
 ## Adding New Signals
 
-Use `data/signal_template.json` as the base structure. Each signal requires:
+New signals are added directly inside `index.html`. There is no separate form or admin panel (this will be revisted for improvement later just to enhance the security/protection of the `index.html`. The signals live in the JavaScript code as a list called `ALL_ALERTS`.
+
+**Finding the right place in the file**
+Open `index.html` in a text editor. Notepad works, but Notepad++ or Visual Studio Code are easier because they highlight the code structure and make it harder to introduce mistakes. Once the file is open, use Find (Ctrl+F) and search for `ALL_ALERTS`. This will jump you directly to the signal list.
+
+Scroll to the bottom of the list. You will see the last signal entry ending with `}`, followed by a closing `]`;. Click just before that `]`; and paste your new signal entry there.
+
+**Signal structure**
+Use `data/signal_template.json` as the base structure. Each signal follows this format:
 
 ```json
 {
@@ -73,6 +81,18 @@ Use `data/signal_template.json` as the base structure. Each signal requires:
   "kw": ["keyword1", "keyword2", "keyword3"]
 }
 ```
+**Things to get right before saving**
+The `id` must be a unique number not already used by another signal. Check the existing entries and pick the next number in sequence.
+The `date` field uses `daysAgo(N)` rather than a hardcoded date. If the signal broke yesterday, use `daysAgo(1)`. If it was three days ago, use `daysAgo(3)`. This keeps the freshness badges accurate every time the file is opened.
+The `link` should point to the specific page where the signal is reported, not the homepage of the institution. The `linkNote` should go one step further and identify the exact section or paragraph so a reader can find it without searching.
+The `summary` should be written from a Saudi and Arab Group perspective, not just what happened, but why it matters strategically.
+
+**After saving**
+Save the file and open it in the browser to confirm the new signal appears. If the screen is blank or signals are not loading, the most common cause is a missing or extra comma. Check the entry immediately above where you added the new signal, it should end with `}`, not just `}`.
+
+**Important Tip**
+Always save backup copy of the `index.html` to refer to it everytime you need to i.e., when you mess things up in it. 
+
 
 **Quality standards for signals:**
 1. Link must point to the specific page, not a homepage
