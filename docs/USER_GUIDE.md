@@ -14,7 +14,6 @@ Download `index.html` from the repository, double-click it, and it opens in your
 cd ~/climate-radar
 git pull origin main
 start index.html
-
 ```
 
 **Option 3 - From Command Prompt (Windows)**
@@ -23,7 +22,6 @@ start index.html
 cd C:\Users\YourName\climate-radar
 git pull origin main
 start index.html
-
 ```
 
 If you do not have the repository on your machine yet, clone it first:
@@ -32,9 +30,9 @@ If you do not have the repository on your machine yet, clone it first:
 git clone https://github.com/NaifAlsalem/ClimateRadar.git
 cd ClimateRadar
 start index.html
-
 ```
 Once the file opens, enter the access PIN at the authentication screen. The dashboard loads immediately after.
+
 Chrome or Edge are recommended. The tool works on Firefox and Safari but has been tested most thoroughly on Chromium-based browsers.
 
 ---
