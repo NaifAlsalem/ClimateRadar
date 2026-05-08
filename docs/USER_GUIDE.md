@@ -89,9 +89,9 @@ Shows full signal information including:
 - Full summary
 - Source, category, date
 - **Link Verification:** This automatically checks if the source URL is reachable
-  - ✓ LINK VERIFIED : domain is reachable
-  - ✗ LINK UNREACHABLE : domain could not be reached
-  -  TIMED OUT : no response within 7 seconds
+  - LINK VERIFIED : domain is reachable
+  - LINK UNREACHABLE : domain could not be reached
+  - TIMED OUT : no response within 7 seconds
   - RE-CHECK button to re-verify manually
 - **VIEW SOURCE:** This opens the source page in a new tab
 - **Section note:** This tells you exactly where in the document the signal appears
@@ -103,7 +103,7 @@ Shows full signal information including:
 Use the keyword bar to track specific terms across all signals:
 
 1. Type a keyword in the input field and press **Enter** (or click **+ add keyword**)
-2. Click **⌕ SCAN** to run the keyword search
+2. Click **SCAN** to run the keyword search
 3. Switch to the **KEYWORD RESULTS** tab to see matches
 4. Matched keywords are highlighted on each card
 5. Click ✕ next to any keyword to remove it
