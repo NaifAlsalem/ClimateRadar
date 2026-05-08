@@ -82,15 +82,17 @@ Use `data/signal_template.json` as the base structure. Each signal follows this 
 }
 ```
 **Things to get right before saving**
+
 The `id` must be a unique number not already used by another signal. Check the existing entries and pick the next number in sequence.
 The `date` field uses `daysAgo(N)` rather than a hardcoded date. If the signal broke yesterday, use `daysAgo(1)`. If it was three days ago, use `daysAgo(3)`. This keeps the freshness badges accurate every time the file is opened.
 The `link` should point to the specific page where the signal is reported, not the homepage of the institution. The `linkNote` should go one step further and identify the exact section or paragraph so a reader can find it without searching.
 The `summary` should be written from a Saudi and Arab Group perspective, not just what happened, but why it matters strategically.
 
 **After saving**
+
 Save the file and open it in the browser to confirm the new signal appears. If the screen is blank or signals are not loading, the most common cause is a missing or extra comma. Check the entry immediately above where you added the new signal, it should end with `}`, not just `}`.
 
-**Important Tip**
+**Important Tip:**
 Always save backup copy of the `index.html` to refer to it everytime you need to i.e., when you mess things up in it. 
 
 
