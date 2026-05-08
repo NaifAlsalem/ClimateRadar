@@ -93,9 +93,9 @@ The platform currently monitors the following institutions:
 - **UNFCCC:** Negotiation texts, GST outcomes, COP agendas
 - **IEA:** Energy outlook scenarios and demand projections
 - **G7 / G20:** Communiqués and climate finance pledges
-- **AU (African Union):** — Coalition positions and declarations
+- **AU (African Union):**Coalition positions and declarations
 - **UNEP / GMP:** Methane pledge progress and ministerial outcomes
-- **EU Commission:** — CBAM updates and regulatory expansions
+- **EU Commission:** CBAM updates and regulatory expansions
 - **Vision 2030:** Saudi sustainability alignment assessments
 
 ---
