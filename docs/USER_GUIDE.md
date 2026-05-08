@@ -39,12 +39,12 @@ Chrome or Edge are recommended. The tool works on Firefox and Safari but has bee
 
 ## Interface Overview
 
-### Left Column — Intelligence Metrics
-- **Threat Matrix** — live count of High / Medium / Low risk signals
-- **Narrative Shift Index** — directional trend bars for key climate language
+### Left Column  (Intelligence Metrics)
+- **Threat Matrix:** live count of High / Medium / Low risk signals
+- **Narrative Shift Index:** directional trend bars for key climate language
 
 ### Center Column — Radar
-- **Live radar display** — each blip represents an active signal
+- **Live radar display:** each blip represents an active signal
   - 🔴 Red blips = High risk (inner ring — closest to center)
   - 🟡 Yellow blips = Medium risk (middle ring)
   - 🟢 Green blips = Low risk (outer ring)
