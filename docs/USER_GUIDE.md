@@ -48,21 +48,21 @@ Chrome or Edge are recommended. The tool works on Firefox and Safari but has bee
   - 🔴 Red blips = High risk (inner ring — closest to center)
   - 🟡 Yellow blips = Medium risk (middle ring)
   - 🟢 Green blips = Low risk (outer ring)
-- **Signal counter** — updates as you filter
-- **Sources Scanned** — increments with each new scan run
-- **RUN NEW SCAN** — re-sorts and refreshes the signal feed
+- **Signal counter:** This updates as you filter
+- **Sources Scanned:** This increments with each new scan run
+- **RUN NEW SCAN:** This re-sorts and refreshes the signal feed
 
-### Right Column — Intelligence Feed
+### Right Column (Intelligence Feed)
 
 #### Search Bar
 Type any term to instantly filter signals across all tabs. Press ✕ to clear.
 
 #### ALL TIME / RECENT Toggle
-- **ALL TIME** — shows all signals regardless of age
-- **RECENT** — filters to signals from the last 90 days only
+- **ALL TIME:** This shows all signals regardless of age
+- **RECENT:** This filters to signals from the last 30 days only
 
 #### Category Filters
-Click any chip to filter by: Narrative · Policy · Negotiation · Finance · Alliance · Strategic
+Click any chip to filter by: Narrative | Policy | Negotiation | Finance | Alliance | Strategic
 
 #### ⬇ PDF Button
 Downloads a classified PDF report of all currently visible signals.
@@ -72,8 +72,8 @@ Downloads a classified PDF report of all currently visible signals.
 ## Signal Cards
 
 Each card shows:
-- **Freshness badge** — NEW / RECENT / age / STALE
-- **Risk badge** — HIGH / MEDIUM / LOW
+- **Freshness badge:** shown as NEW / RECENT / age / STALE
+- **Risk badge:** shown as HIGH / MEDIUM / LOW
 - **Category**
 - **Summary**
 - **Source** and **date**
@@ -88,13 +88,13 @@ Shows full signal information including:
 - Risk classification
 - Full summary
 - Source, category, date
-- **Link Verification** — automatically checks if the source URL is reachable
-  - ✓ LINK VERIFIED — domain is reachable
-  - ✗ LINK UNREACHABLE — domain could not be reached
-  - ⚠ TIMED OUT — no response within 7 seconds
+- **Link Verification:** This automatically checks if the source URL is reachable
+  - ✓ LINK VERIFIED : domain is reachable
+  - ✗ LINK UNREACHABLE : domain could not be reached
+  - ⚠ TIMED OUT : no response within 7 seconds
   - RE-CHECK button to re-verify manually
-- **VIEW SOURCE** — opens the source page in a new tab
-- **📍 Section note** — tells you exactly where in the document the signal appears
+- **VIEW SOURCE:** This opens the source page in a new tab
+- **📍 Section note:** This tells you exactly where in the document the signal appears
 
 ---
 
@@ -121,9 +121,8 @@ The PDF report includes:
 - Active keyword watchlist
 - Stats bar (total, High/Medium/Low counts)
 - All currently filtered signals with full details and hyperlinks
-- Classified footer: `Strategic Intelligence | Naif Alsalem · CONFIDENTIAL`
 
-> **Tip:** Apply filters before exporting — the PDF always reflects what is currently visible on screen.
+> **Tip:** Apply filters before exporting as the PDF always reflects what is currently visible on screen.
 
 ---
 
