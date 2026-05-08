@@ -7,6 +7,8 @@ Usage:
     python3 scripts/validate_links.py
     python3 scripts/validate_links.py --verbose
     python3 scripts/validate_links.py --output report.txt
+
+© 2026 Dr. Naif Alsalem. All rights reserved.
 """
 
 import re
