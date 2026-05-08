@@ -64,7 +64,7 @@ Type any term to instantly filter signals across all tabs. Press ✕ to clear.
 #### Category Filters
 Click any chip to filter by: Narrative | Policy | Negotiation | Finance | Alliance | Strategic
 
-#### ⬇ PDF Button
+#### PDF Button
 Downloads a classified PDF report of all currently visible signals.
 
 ---
