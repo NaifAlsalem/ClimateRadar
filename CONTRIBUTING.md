@@ -36,8 +36,8 @@ This is a private project. Contributions are limited to authorized team members.
 ## Code Style
 
 - All JavaScript uses concise inline style (matching existing code pattern)
-- React state kept flat — no nested state objects
-- Inline styles only — no separate CSS files
+- React state kept flat (no nested state objects)
+- Inline styles only (no separate CSS files)
 - Comments in English
 
 ---
