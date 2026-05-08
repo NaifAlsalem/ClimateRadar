@@ -1,8 +1,9 @@
-# Keyword Watch System — Guide
+# Keyword Watch System
 
 ## Overview
 
-The Keyword Watch system scans all signal titles, summaries, and internal keyword tags for terms you define. It is designed to surface hidden connections across signals that might not be apparent from titles alone.
+The Keyword Watch system scans every signal's title, summary, and topic tags for terms that we already define.
+The goal is to surface connections across signals that a quick read of the headlines would miss, and to make sure nothing relevant to our priorities slips through during a high-volume scan.
 
 ---
 
@@ -83,14 +84,17 @@ Matching is case-insensitive. Partial matches are supported (e.g., "carbon" matc
 ---
 
 ## Tips
+All keywords are managed directly in the Keyword Watch bar at the top of the Intelligence Feed. Type a term in the input field and press Enter to add it. Keywords appear as chips and can be removed at any time by clicking the x next to them. Once your list is set, click SCAN and switch to the KEYWORD RESULTS tab to see what matched.
 
-- **Combine broad + specific:** Add both "methane" and "OGMP 2.0" to catch all levels of coverage
-- **Use institution names:** Adding "IEA" will surface any signal from or referencing the International Energy Agency
-- **Policy codes:** "Article 6", "6.4", "CBAM" are highly specific and low-noise
-- **Avoid single letters:** Very short terms produce too many false matches
+A few things worth keeping in mind as you build your watchlist:
+
+- **Combine broad + specific:** Adding both "methane" and "OGMP 2.0" at the same time means you will catch general methane coverage as well as signals specifically referencing the Oil and Gas Methane Partnership framework. One does not replace the other.
+- **Use institution names:** Typing "IEA" and pressing Enter will surface any signal that mentions the International Energy Agency, whether it is the original source or just referenced in the text.
+- **Policy codes:** Terms like "Article 6", "CBAM", and "GST" are specific enough that almost every result they return will be relevant. These are worth keeping in your watchlist permanently during active negotiation cycles.
+- **Avoid single letters:** A single word like "gas" or "oil" will match too many unrelated signals and make the results hard to read. Use "natural gas", "oil demand", or "fossil fuel" instead to keep results focused.
 
 ---
 
 ## Exporting Keyword Results
 
-After running a keyword scan, switch to the **KEYWORD RESULTS** tab, then click **⬇ PDF** — the export will reflect only the keyword-matched signals currently visible.
+After running a keyword scan, switch to the **KEYWORD RESULTS** tab, then click **PDF** and the export will reflect only the keyword-matched signals currently visible.
