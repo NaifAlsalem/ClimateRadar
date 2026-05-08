@@ -41,7 +41,7 @@ App (root)
     └── Tabs
         ├── Intelligence Feed   - alert cards with freshness badges
         ├── Keyword Results     - filtered by watched keywords
-        └── Strategic Brief     - pre-written analysis sections
+        └── Strategic Brief     - structured analysis with live signal references
 ```
 
 ---
