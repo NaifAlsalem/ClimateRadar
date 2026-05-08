@@ -91,10 +91,10 @@ Shows full signal information including:
 - **Link Verification:** This automatically checks if the source URL is reachable
   - ✓ LINK VERIFIED : domain is reachable
   - ✗ LINK UNREACHABLE : domain could not be reached
-  - ⚠ TIMED OUT : no response within 7 seconds
+  -  TIMED OUT : no response within 7 seconds
   - RE-CHECK button to re-verify manually
 - **VIEW SOURCE:** This opens the source page in a new tab
-- **📍 Section note:** This tells you exactly where in the document the signal appears
+- **Section note:** This tells you exactly where in the document the signal appears
 
 ---
 
