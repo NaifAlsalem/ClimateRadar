@@ -47,9 +47,9 @@ Signals that are **informational or favorable** to current positions. May repres
 
 | Badge | Age | Meaning |
 |---|---|---|
-| 🟢 **NEW** | ≤ 7 days | Breaking development — high priority review |
-| 🟢 **RECENT** | 8–30 days | Active development — monitor closely |
-| 🟡 **Xd AGO** | 31–90 days | Background context — situational awareness |
+| 🟢 **NEW** | ≤ 7 days | Breaking development that is of high priority review |
+| 🟢 **RECENT** | 8–30 days | Active development that needs to be monitored closely |
+| 🟡 **Xd AGO** | 31–90 days | Background context serves as a situational awareness |
 | 🔴 **STALE** | > 90 days | Historical reference only |
 
 ---
