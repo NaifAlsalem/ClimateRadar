@@ -1,4 +1,4 @@
-# ◈ Climate Radar: A Strategic Intelligence Platform
+# Climate Radar: A Strategic Intelligence Platform
 
 > **Private Repository** · Authorized access only · Dr. Naif Alsalem
 
