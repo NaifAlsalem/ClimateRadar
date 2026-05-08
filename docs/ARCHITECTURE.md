@@ -5,6 +5,7 @@
 Climate Radar is built as a single HTML file. There is no build process, no package manager, no server to configure - just open the file in a browser, enter the access PIN, and you are looking at live climate intelligence within seconds.
 React and Babel, two lightweight JavaScript libraries, handle everything that updates in real time. Both load silently when you open the file, with nothing to install and nothing to configure.
 This was a deliberate architectural choice. 
+
 A tool that requires a developer to set up is a tool that does not get used during a negotiation session. By keeping everything inside a single file, any team member can open it on any laptop, in any location, without depending on IT support or a dedicated server. The file is also easy to version, share securely, and update without breaking anything.
 
 The tradeoff is that this is client-side software, not a hardened system. It is built for operational speed and accessibility. When the use case evolves to require multi-user access, persistent storage, or tighter security controls, the architecture can grow with it.
