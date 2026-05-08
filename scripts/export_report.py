@@ -9,6 +9,8 @@ Usage:
     python3 scripts/export_report.py --risk High
     python3 scripts/export_report.py --category Negotiation --days 30
     python3 scripts/export_report.py --format markdown --output brief.md
+
+© 2026 Dr. Naif Alsalem. All rights reserved.
 """
 
 import re
