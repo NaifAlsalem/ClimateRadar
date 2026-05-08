@@ -1,10 +1,41 @@
-# User Guide — Climate Radar
+# User Guide
 
 ## Getting Started
 
-1. Open `index.html` in your browser (Chrome or Edge recommended)
-2. Enter your access code at the authentication screen
-3. The dashboard loads automatically — the radar begins scanning
+There are three ways to launch Climate Radar.
+
+**Option 1 - Direct file open (simplest)**
+
+Download `index.html` from the repository, double-click it, and it opens in your default browser. No setup required.
+
+**Option 2 - From Git Bash**
+
+```
+cd ~/climate-radar
+git pull origin main
+start index.html
+
+```
+
+**Option 3 - From Command Prompt (Windows)**
+
+```
+cd C:\Users\YourName\climate-radar
+git pull origin main
+start index.html
+
+```
+
+If you do not have the repository on your machine yet, clone it first:
+
+```
+git clone https://github.com/NaifAlsalem/ClimateRadar.git
+cd ClimateRadar
+start index.html
+
+```
+Once the file opens, enter the access PIN at the authentication screen. The dashboard loads immediately after.
+Chrome or Edge are recommended. The tool works on Firefox and Safari but has been tested most thoroughly on Chromium-based browsers.
 
 ---
 
