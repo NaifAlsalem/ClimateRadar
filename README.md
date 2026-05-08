@@ -115,5 +115,5 @@ The platform currently monitors the following institutions:
 
 This repository is **private**. All contents are confidential and intended for authorized team use only. Redistribution is prohibited.
 
-**© 2026 Naif Alsalem. All rights reserved.** 
+**© 2026 Dr. Naif Alsalem. All rights reserved.** 
 
