@@ -648,57 +648,7 @@ function App(){
                 })}
               </div>
 
-              {/* DETAIL PANEL */}
-              {sel&&(
-                <div className='mob-detail' style={{width:280,flexShrink:0,background:'rgba(0,10,7,.97)',border:'1px solid rgba(0,200,120,.18)',borderRadius:2,padding:16,position:'sticky',top:0,maxHeight:'calc(100vh - 200px)',overflowY:'auto'}}>
-                  <div style={{fontSize:8,letterSpacing:3,color:'rgba(0,200,120,.35)',marginBottom:10}}>SIGNAL DETAIL</div>
-                  <div style={{fontSize:12,color:'#d8f0e4',fontWeight:700,lineHeight:1.55,marginBottom:10}}>{sel.title}</div>
-                  <div style={{padding:'7px 10px',marginBottom:10,background:RB(sel.risk),border:'1px solid '+RC(sel.risk)+'30',borderRadius:1}}>
-                    <span style={{fontSize:9,letterSpacing:2,color:RC(sel.risk),fontWeight:700}}>RISK: {sel.risk.toUpperCase()}</span>
-                  </div>
-                  <div style={{fontSize:11,color:'rgba(180,220,200,.68)',lineHeight:1.8,marginBottom:12}}>{sel.summary}</div>
-                  <div style={{borderTop:'1px solid rgba(0,200,120,.1)',paddingTop:10,marginBottom:12}}>
-                    {[['SOURCE',sel.source],['CATEGORY',sel.category],['DATE',sel.date]].map(([k,v])=>(
-                      <div key={k} style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
-                        <span style={{fontSize:9,color:'rgba(0,200,120,.35)',letterSpacing:1.5}}>{k}</span>
-                        <span style={{fontSize:10,color:'rgba(180,220,200,.68)'}}>{v}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Link verification */}
-                  {(()=>{
-                    const st=linkSt[sel.id];
-                    const stColor=st==='ok'?'#00c878':st==='fail'?'#ff4040':st==='timeout'?'#ffaa00':'rgba(0,200,120,.38)';
-                    const stLabel=st==='checking'?'CHECKING...':st==='ok'?'VERIFIED':st==='fail'?'UNREACHABLE':st==='timeout'?'TIMED OUT':'NOT CHECKED';
-                    return(
-                      <div style={{marginBottom:8}}>
-                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 8px',background:'rgba(0,15,10,.6)',border:'1px solid '+stColor+'25',borderBottom:'none',borderRadius:'2px 2px 0 0'}}>
-                          <span style={{fontSize:8,letterSpacing:1.5,color:stColor,display:'flex',alignItems:'center',gap:4}}>
-                            {st==='checking'&&React.createElement('span',{className:'spin-anim'},'+')}{' '}{stLabel}
-                          </span>
-                          <button onClick={()=>verifyLink(sel.id,sel.link)} className="btn" disabled={st==='checking'}
-                            style={{fontSize:7,letterSpacing:1,background:'transparent',border:'1px solid '+stColor+'35',color:stColor,padding:'1px 6px',borderRadius:1}}>
-                            CHECK
-                          </button>
-                        </div>
-                        <a href={sel.link} target="_blank" rel="noopener noreferrer" style={{display:'block',textDecoration:'none'}}>
-                          <div style={{padding:'7px 8px',background:'rgba(0,200,120,.06)',border:'1px solid rgba(0,200,120,.2)',borderBottom:'none'}}>
-                            <div style={{fontSize:8,color:'rgba(0,200,120,.45)',marginBottom:2}}>VIEW SOURCE</div>
-                            <div style={{fontSize:10,color:'#00c878',fontWeight:600}}>{sel.linkLabel}</div>
-                          </div>
-                          <div style={{padding:'5px 8px',background:'rgba(0,70,40,.08)',border:'1px solid rgba(0,200,120,.12)',borderRadius:'0 0 2px 2px'}}>
-                            <div style={{fontSize:9,color:'rgba(0,200,120,.45)'}}>{sel.linkNote}</div>
-                          </div>
-                        </a>
-                      </div>
-                    );
-                  })()}
-                  <button onClick={()=>setSel(null)} className="btn"
-                    style={{display:'block',width:'100%',padding:'6px',fontSize:9,letterSpacing:2,background:'transparent',border:'1px solid rgba(0,200,120,.1)',color:'rgba(0,200,120,.35)',borderRadius:1,marginTop:4}}>
-                    CLOSE
-                  </button>
-                </div>
-              )}
+              {/* detail panel moved to root overlay */}
             </>
           )}
 
@@ -771,6 +721,56 @@ function App(){
         </div>
       </div>
     </div>
+    {/* SIGNAL DETAIL OVERLAY — works on both desktop and mobile */}
+    {sel&&(
+      <div style={{position:'fixed',top:0,right:0,bottom:0,width:'min(320px,100vw)',background:'rgba(0,10,7,.97)',borderLeft:'1px solid rgba(0,200,120,.22)',zIndex:500,overflowY:'auto',padding:18,display:'flex',flexDirection:'column',gap:0}}>
+        <div style={{fontSize:8,letterSpacing:3,color:'rgba(0,200,120,.35)',marginBottom:10}}>SIGNAL DETAIL</div>
+        <div style={{fontSize:12,color:'#d8f0e4',fontWeight:700,lineHeight:1.55,marginBottom:10}}>{sel.title}</div>
+        <div style={{padding:'7px 10px',marginBottom:10,background:RB(sel.risk),border:'1px solid '+RC(sel.risk)+'30',borderRadius:1}}>
+          <span style={{fontSize:9,letterSpacing:2,color:RC(sel.risk),fontWeight:700}}>RISK: {sel.risk.toUpperCase()}</span>
+        </div>
+        <div style={{fontSize:11,color:'rgba(180,220,200,.68)',lineHeight:1.8,marginBottom:12}}>{sel.summary}</div>
+        <div style={{borderTop:'1px solid rgba(0,200,120,.1)',paddingTop:10,marginBottom:12}}>
+          {[['SOURCE',sel.source],['CATEGORY',sel.category],['DATE',sel.date]].map(([k,v])=>(
+            <div key={k} style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+              <span style={{fontSize:9,color:'rgba(0,200,120,.35)',letterSpacing:1.5}}>{k}</span>
+              <span style={{fontSize:10,color:'rgba(180,220,200,.68)'}}>{v}</span>
+            </div>
+          ))}
+        </div>
+        {(()=>{
+          const st=linkSt[sel.id];
+          const stColor=st==='ok'?'#00c878':st==='fail'?'#ff4040':st==='timeout'?'#ffaa00':'rgba(0,200,120,.38)';
+          const stLabel=st==='checking'?'CHECKING...':st==='ok'?'VERIFIED':st==='fail'?'UNREACHABLE':st==='timeout'?'TIMED OUT':'NOT CHECKED';
+          return(
+            <div style={{marginBottom:8}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 8px',background:'rgba(0,15,10,.6)',border:'1px solid '+stColor+'25',borderBottom:'none',borderRadius:'2px 2px 0 0'}}>
+                <span style={{fontSize:8,letterSpacing:1.5,color:stColor,display:'flex',alignItems:'center',gap:4}}>
+                  {st==='checking'&&React.createElement('span',{className:'spin-anim'},'+')}{' '}{stLabel}
+                </span>
+                <button onClick={()=>verifyLink(sel.id,sel.link)} className="btn" disabled={st==='checking'}
+                  style={{fontSize:7,letterSpacing:1,background:'transparent',border:'1px solid '+stColor+'35',color:stColor,padding:'1px 6px',borderRadius:1}}>
+                  CHECK
+                </button>
+              </div>
+              <a href={sel.link} target="_blank" rel="noopener noreferrer" style={{display:'block',textDecoration:'none'}}>
+                <div style={{padding:'7px 8px',background:'rgba(0,200,120,.06)',border:'1px solid rgba(0,200,120,.2)',borderBottom:'none'}}>
+                  <div style={{fontSize:8,color:'rgba(0,200,120,.45)',marginBottom:2}}>VIEW SOURCE</div>
+                  <div style={{fontSize:10,color:'#00c878',fontWeight:600}}>{sel.linkLabel}</div>
+                </div>
+                <div style={{padding:'5px 8px',background:'rgba(0,70,40,.08)',border:'1px solid rgba(0,200,120,.12)',borderRadius:'0 0 2px 2px'}}>
+                  <div style={{fontSize:9,color:'rgba(0,200,120,.45)'}}>{sel.linkNote}</div>
+                </div>
+              </a>
+            </div>
+          );
+        })()}
+        <button onClick={()=>setSel(null)} className="btn"
+          style={{display:'block',width:'100%',padding:'8px',fontSize:10,letterSpacing:2,background:'rgba(255,60,60,.08)',border:'1px solid rgba(255,60,60,.25)',color:'#ff7070',borderRadius:1,marginTop:8}}>
+          CLOSE
+        </button>
+      </div>
+    )}
   </div>
   );
 }
