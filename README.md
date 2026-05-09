@@ -76,7 +76,7 @@ python3 -c "import hashlib; print(hashlib.sha256('9999'.encode()).hexdigest())"
 
 **GitHub Pages (private team):**
 ```bash
-git clone <repo-url>
+git clone https://github.com/NaifAlsalem/ClimateRadar
 # Open index.html directly — or serve with:
 python3 -m http.server 8080
 ```
