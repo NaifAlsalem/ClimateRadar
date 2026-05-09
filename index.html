@@ -32,17 +32,17 @@ input::placeholder{color:rgba(100,180,140,.35)}
 
 /* ── MOBILE RESPONSIVE (iPhone & tablets) ── */
 @media(max-width:768px){
-  html,body,#root{overflow:auto;height:auto;min-height:100vh}
-  .mob-body{flex-direction:column!important;overflow-y:auto!important;height:auto!important}
-  .mob-left{width:100%!important;border-right:none!important;border-bottom:1px solid rgba(0,200,120,.1)!important;flex-direction:row!important;flex-wrap:wrap;padding:10px!important;gap:8px}
-  .mob-center{width:100%!important;border-right:none!important;border-bottom:1px solid rgba(0,200,120,.1)!important}
-  .mob-right{width:100%!important}
-  .mob-header{flex-direction:column!important;align-items:flex-start!important;gap:6px!important;padding:10px 14px!important}
+  html,body,#root{overflow:auto!important;height:auto!important;min-height:100vh}
+  .mob-main{height:auto!important;overflow:visible!important;min-height:100vh}
+  .mob-body{flex-direction:column!important;overflow:visible!important;height:auto!important}
+  .mob-left{width:100%!important;border-right:none!important;border-bottom:1px solid rgba(0,200,120,.1)!important;flex-direction:row!important;flex-wrap:wrap;padding:10px!important;gap:8px;flex-shrink:0!important}
+  .mob-center{width:100%!important;border-right:none!important;border-bottom:1px solid rgba(0,200,120,.1)!important;flex-shrink:0!important;overflow:visible!important}
+  .mob-right{width:100%!important;overflow:visible!important;height:auto!important;flex:none!important}
+  .mob-header{flex-direction:column!important;align-items:flex-start!important;gap:4px!important;padding:10px 14px!important}
   .mob-header-center{align-items:flex-start!important;text-align:left!important}
-  .mob-feed{flex-direction:column!important}
+  .mob-feed{flex-direction:column!important;overflow:visible!important;flex:none!important;height:auto!important;max-height:none!important}
   .mob-detail{width:100%!important;position:relative!important;top:auto!important;max-height:none!important}
-  .mob-radar canvas{width:240px!important;height:240px!important}
-  .mob-scan-btn{font-size:10px!important}
+  .mob-radar canvas{width:220px!important;height:220px!important}
 }
 </style>
 </head>
@@ -444,7 +444,7 @@ function App(){
 
   /* MAIN UI */
   return(
-  <div style={{height:'100vh',display:'flex',flexDirection:'column',background:'#020b0a',color:'#9ecfb8',overflow:'hidden',position:'relative'}}>
+  <div style={{height:'100vh',display:'flex',flexDirection:'column',background:'#020b0a',color:'#9ecfb8',overflow:'hidden',position:'relative'}} className='mob-main'>
     <div style={{position:'fixed',inset:0,background:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px)',pointerEvents:'none',zIndex:0}}/>
 
     {/* HEADER */}
@@ -544,7 +544,7 @@ function App(){
       </div>
 
       {/* RIGHT PANEL */}
-      <div className='mob-right' style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div className='mob-right' style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',minWidth:0}}>
 
         {/* Controls */}
         <div style={{padding:'10px 18px',borderBottom:'1px solid rgba(0,200,120,.08)',background:'rgba(0,5,3,.6)',flexShrink:0}}>
