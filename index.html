@@ -41,7 +41,16 @@ input::placeholder{color:rgba(100,180,140,.35)}
   .mob-header{flex-direction:column!important;align-items:flex-start!important;gap:4px!important;padding:10px 14px!important}
   .mob-header-center{align-items:flex-start!important;text-align:left!important}
   .mob-feed{flex-direction:column!important;overflow:visible!important;flex:none!important;height:auto!important;max-height:none!important}
-  .mob-detail{width:100%!important;position:relative!important;top:auto!important;max-height:none!important}
+  .mob-detail{
+    position:fixed!important;
+    top:0!important;left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;
+    max-height:100vh!important;
+    overflow-y:auto!important;
+    z-index:999;
+    border-radius:0!important;
+    padding:20px 16px!important;
+  }
   .mob-radar canvas{width:220px!important;height:220px!important}
 }
 </style>
@@ -641,7 +650,7 @@ function App(){
 
               {/* DETAIL PANEL */}
               {sel&&(
-                <div className='mob-detail' style={{width:280,flexShrink:0,background:'rgba(0,10,7,.94)',border:'1px solid rgba(0,200,120,.18)',borderRadius:2,padding:16,position:'sticky',top:0,maxHeight:'calc(100vh - 200px)',overflowY:'auto'}}>
+                <div className='mob-detail' style={{width:280,flexShrink:0,background:'rgba(0,10,7,.97)',border:'1px solid rgba(0,200,120,.18)',borderRadius:2,padding:16,position:'sticky',top:0,maxHeight:'calc(100vh - 200px)',overflowY:'auto'}}>
                   <div style={{fontSize:8,letterSpacing:3,color:'rgba(0,200,120,.35)',marginBottom:10}}>SIGNAL DETAIL</div>
                   <div style={{fontSize:12,color:'#d8f0e4',fontWeight:700,lineHeight:1.55,marginBottom:10}}>{sel.title}</div>
                   <div style={{padding:'7px 10px',marginBottom:10,background:RB(sel.risk),border:'1px solid '+RC(sel.risk)+'30',borderRadius:1}}>
