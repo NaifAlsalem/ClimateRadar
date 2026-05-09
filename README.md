@@ -34,9 +34,9 @@ climate-radar/
 │   └── export_report.py        # Batch PDF export utility
 ├── assets/
 │   └── README.md               # Asset management notes
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-└── .gitignore
+├── CHANGELOG.md                # Here we track every change in the repo
+├── CONTRIBUTING.md             #
+└── .gitignore                  # Just a script to prevent 
 ```
 
 ---
