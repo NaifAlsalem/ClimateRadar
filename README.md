@@ -35,8 +35,8 @@ climate-radar/
 ├── assets/
 │   └── README.md               # Asset management notes
 ├── CHANGELOG.md                # Here we track every change in the repo
-├── CONTRIBUTING.md             #
-└── .gitignore                  # Just a script to prevent 
+├── CONTRIBUTING.md             # Want to contribute? Please read through this and I would be very delighted to get you involved. 
+└── .gitignore                  # Just a script to prevent unnecessary, sensitive, or system-generated files from being pushed to GitHub.
 ```
 
 ---
