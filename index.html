@@ -464,7 +464,7 @@ function App(){
   if(!authed)return(
     <div style={{height:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'#020b0a',fontFamily:"'Share Tech Mono',monospace"}}>
       <div style={{fontFamily:"'Orbitron',sans-serif",fontSize:26,fontWeight:900,color:'#00e87a',letterSpacing:4,textShadow:'0 0 28px rgba(0,232,122,.5)',marginBottom:6}}>CLIMATE RADAR</div>
-      <div style={{fontSize:16,color:'rgba(255,160,50,.75)',letterSpacing:3,marginBottom:36}}>Strategic Intelligence Platform</div>
+      <div style={{fontFamily:"Georgia, serif",fontSize:14,color:'rgba(255,160,50,.75)',letterSpacing:2,marginBottom:36}}>Strategic Intelligence Platform</div>
       <div style={{fontSize:14,color:'rgba(0,200,120,.4)',letterSpacing:2,marginBottom:10}}>ENTER ACCESS CODE</div>
       <input type="password" value={pin} onChange={e=>setPin(e.target.value)}
         onKeyDown={e=>e.key==='Enter'&&doAuth()} maxLength={12} placeholder="........"
