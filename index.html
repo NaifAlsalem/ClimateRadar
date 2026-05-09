@@ -321,7 +321,7 @@ function App(){
   const[scanCount,setScanCount]=useState(0);
   const[totalFetched,setTotalFetched]=useState(0);
   const[isLive,setIsLive]=useState(false);
-  const[lastScan,setLastScan]=useState('--');
+  const[lastScan,setLastScan]=useState(()=>{const n=new Date();return n.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' GST';});
   const[keywords,setKeywords]=useState(['fossil fuel','CBAM','phase-out']);
   const[newKw,setNewKw]=useState('');
   const[kwResults,setKwResults]=useState([]);
