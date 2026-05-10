@@ -92,11 +92,26 @@ Example:
 
 
 **GitHub Pages (private team):**
-```bash
-git clone https://github.com/NaifAlsalem/ClimateRadar
-# Open index.html directly — or serve with:
-python3 -m http.server 8080
-```
+
+# First time — clone the repository
+git clone https://github.com/NaifAlsalem/ClimateRadar.git climate-radar
+
+# Open the platform
+cd climate-radar
+start index.html
+
+# To get the latest updates
+git pull origin main
+start index.html
+
+# To start fresh — delete and reclone
+cd ~
+rm -rf climate-radar
+git clone https://github.com/NaifAlsalem/ClimateRadar.git climate-radar
+
+
+
+
 **Using Git Bash**
 
 
