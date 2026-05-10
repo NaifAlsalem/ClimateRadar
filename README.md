@@ -151,7 +151,7 @@ The platform currently monitors the following institutions:
 
 - [ ] Live API integration (UNFCCC, IEA public feeds)
 - [ ] Arabic language interface toggle
-- [ ] Multi-user access with role levels
+- [ ] Multi-user access with role levels (we will need to have our own private server)
 - [ ] Automated weekly digest PDF via cron
 - [ ] Signal annotation and team notes
 - [ ] Historical signal archive viewer
