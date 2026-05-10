@@ -158,7 +158,7 @@ The platform currently monitors the following institutions:
 
 ## Confidentiality
 
-This repository is **private**. All contents are confidential and intended for authorized team use only. Redistribution is prohibited.
+This repository is **private**. All contents are intended for authorized team use only. Please keep it within the team.
 
 **© 2026 Dr. Naif Alsalem. All rights reserved.** 
 
