@@ -1,6 +1,7 @@
 # Contributing to Climate Radar
 
 This is a private project. Contributions are limited to authorized team members.
+> Please contact Naif Alsalem for contribution and/or collberation. 
 
 ---
 
