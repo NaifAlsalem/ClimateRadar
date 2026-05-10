@@ -1,6 +1,7 @@
 # Changelog
 
 All notable changes to Climate Radar are documented here.
+Note: Please contact: Naif Alsalem, for any contribution on GitHub. 
 
 ---
 
@@ -31,7 +32,6 @@ All notable changes to Climate Radar are documented here.
 ### Added
 - PIN authentication with SHA-256 hashing and session persistence
 - Anti-theft measures: right-click disabled, DevTools shortcuts blocked
-- Confidential watermark on print
 - Link verification system (HEAD check with 7s timeout + RE-CHECK button)
 - `linkLabel` and `linkNote` fields — specific source page and section references
 - Freshness badge system: NEW / RECENT / Xd AGO / STALE
