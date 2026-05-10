@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to Climate Radar are documented here.
-Note: Please contact: Naif Alsalem, for any contribution on GitHub. 
+- Note: Please contact: Naif Alsalem, for any contribution on GitHub. 
 
 ---
 
