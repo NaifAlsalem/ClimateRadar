@@ -54,6 +54,9 @@ climate-radar/
 | Live Scan | Fetches real-time signals from monitored climate sources with each scan run, updating the radar, signal feed, and counters with live data |
 | Freshness Badges | NEW / RECENT / STALE indicators calculated from today's date |
 | PIN Protection | SHA-256 hashed access code with session persistence |
+| Official Decisions | Searchable database of UNFCCC decisions and IPCC reports with direct links to source pages and PDF downloads |
+| Mobile Friendly | Fully responsive layout tested on Chrome for iPhone |
+
 
 ---
 
@@ -134,16 +137,35 @@ Example:
 
 ## Signal Sources
 
-The platform currently monitors the following institutions:
+The platform monitors twelve live sources across climate journalism and official bodies:
 
-- **IPCC:** Assessment reports and working group drafts
-- **UNFCCC:** Negotiation texts, GST outcomes, COP agendas
-- **IEA:** Energy outlook scenarios and demand projections
-- **G7 / G20:** Communiqués and climate finance pledges
-- **AU (African Union):** Coalition positions and declarations
-- **UNEP / GMP:** Methane pledge progress and ministerial outcomes
-- **EU Commission:** CBAM updates and regulatory expansions
-- **Vision 2030:** Saudi sustainability alignment assessments
+**Climate Journalism**
+
+- Carbon Brief
+- Climate Home News
+- The Guardian - Climate Crisis
+- DeSmog
+- Yale Environment 360
+
+**Official Bodies**
+
+- UN Climate News
+- UNFCCC News
+- IPCC News
+
+**Policy and Trade**
+
+- EU Climate
+- Reuters Environment
+- BBC Environment
+- E&E News
+---
+
+## Official Decisions Database
+
+The platform includes a searchable database of key UNFCCC decisions and IPCC reports accessible from the OFFICIAL DECISIONS tab. Each entry includes a direct link to the source page and a PDF download where available.
+**UNFCCC decisions covered:** COP28 UAE Consensus, Loss and Damage Fund, COP27 Sharm Implementation Plan, COP26 Glasgow Pact, Article 6 Carbon Markets, Paris Agreement Articles 2 / 4 / 9, Global Stocktake Synthesis, COP29 NCQG.
+**IPCC documents covered:** AR6 Synthesis, WG1 / WG2 / WG3, SR1.5, SRCCL, SROCC, AR7 status, Chapter 6 Energy Systems, Chapter 17 Just Transition.
 
 ---
 
