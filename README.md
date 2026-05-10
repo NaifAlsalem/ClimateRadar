@@ -92,8 +92,9 @@ Example:
 
 
 **GitHub Pages (private team):**
+```
+First time — clone the repository
 
-# First time — clone the repository
 git clone https://github.com/NaifAlsalem/ClimateRadar.git climate-radar
 
 # Open the platform
@@ -108,7 +109,7 @@ start index.html
 cd ~
 rm -rf climate-radar
 git clone https://github.com/NaifAlsalem/ClimateRadar.git climate-radar
-
+```
 
 
 
