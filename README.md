@@ -116,8 +116,8 @@ git clone https://github.com/NaifAlsalem/ClimateRadar.git climate-radar
 
 
 ```
-git clone https://github.com/NaifAlsalem/ClimateRadar
 cd climateRadar
+git clone https://github.com/NaifAlsalem/ClimateRadar
 npx serve .
 ```
 The local/network ID will be created and copied to to your clipboard. Go to the browser and paste it to get the platform launched. See the example below.
