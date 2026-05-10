@@ -122,7 +122,8 @@ npx serve .
 ```
 The local/network ID will be created and copied to to your clipboard. Go to the browser and paste it to get the platform launched. See the example below.
 Example: 
-<img width="651" height="440" alt="Capture" src="https://github.com/user-attachments/assets/26e3bbae-2117-4607-a3e5-caf99b98170d" />
+
+<img width="887" height="443" alt="GitBash_snippet" src="https://github.com/user-attachments/assets/287efcec-e51b-4258-98c9-ef73fd7d111d" />
 
 
 
