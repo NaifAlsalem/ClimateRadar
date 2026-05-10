@@ -26,7 +26,7 @@ All notable changes to Climate Radar are documented here.
 
 ---
 
-## [2.0.0] — 2026-05-05
+## [2.0.0] — 2026-04-15
 
 ### Added
 - PIN authentication with SHA-256 hashing and session persistence
