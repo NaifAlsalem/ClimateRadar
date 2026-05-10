@@ -45,7 +45,7 @@ All notable changes to Climate Radar are documented here.
 
 ---
 
-## [1.5.0] — 2026-05-03
+## [1.5.0] — 2026-03-03
 
 ### Added
 - Keyword Watch bar with persistent keyword chips
@@ -58,7 +58,7 @@ All notable changes to Climate Radar are documented here.
 
 ---
 
-## [1.0.0] — 2026-05-01
+## [1.0.0] — 2026-02-01
 
 ### Initial Release
 - Live radar canvas with animated sweep
