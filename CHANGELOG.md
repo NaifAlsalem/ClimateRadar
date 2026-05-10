@@ -8,13 +8,12 @@ All notable changes to Climate Radar are documented here.
 ## [2.1.0] — 2026-05-06
 
 ### Added
-- Dynamic date system where all signal dates now calculated relative to today using `daysAgo(n)` helper
-- Sources Scanned counter increments with each RUN NEW SCAN (+12 to +50 per run)
-- Scan run counter displayed below radar (`RUN #N`)
-- RECENT ONLY toggle (≤90-day filter) with `◉ / ◎` indicator
+- Dynamic date system where all signal dates now calculated relative to today using `daysAgo(n)` helper.
+- Sources Scanned counter increments with each RUN NEW SCAN (+12 to +50 per run).
+- Scan run counter displayed below radar.
+- RECENT ONLY toggle (≤90-day filter) with  indicator.
 
 ### Changed
-- Footer updated to `Strategic Intelligence | Naif Alsalem · CONFIDENTIAL`
 - PDF footer line now bold red with red separator line above
 - Methane signal updated to COP30 2025 UNEP/GMP Ministerial source (Nov 2025)
 - All signal links updated to specific deep-link pages
