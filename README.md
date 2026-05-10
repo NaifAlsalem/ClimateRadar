@@ -164,7 +164,9 @@ The platform monitors twelve live sources across climate journalism and official
 ## Official Decisions Database
 
 The platform includes a searchable database of key UNFCCC decisions and IPCC reports accessible from the OFFICIAL DECISIONS tab. Each entry includes a direct link to the source page and a PDF download where available.
+
 **UNFCCC decisions covered:** COP28 UAE Consensus, Loss and Damage Fund, COP27 Sharm Implementation Plan, COP26 Glasgow Pact, Article 6 Carbon Markets, Paris Agreement Articles 2 / 4 / 9, Global Stocktake Synthesis, COP29 NCQG.
+
 **IPCC documents covered:** AR6 Synthesis, WG1 / WG2 / WG3, SR1.5, SRCCL, SROCC, AR7 status, Chapter 6 Energy Systems, Chapter 17 Just Transition.
 
 ---
