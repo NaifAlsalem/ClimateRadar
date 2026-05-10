@@ -32,7 +32,7 @@ All notable changes to Climate Radar are documented here.
 - PIN authentication with SHA-256 hashing and session persistence
 - Anti-theft measures: right-click disabled, DevTools shortcuts blocked
 - Link verification system (HEAD check with 7s timeout + RE-CHECK button)
-- `linkLabel` and `linkNote` fields — specific source page and section references
+- `linkLabel` and `linkNote` fields (specific source page and section references)
 - Freshness badge system: NEW / RECENT / Xd AGO / STALE
 - Three-column layout with radar as centered hero element
 - Risk legend below radar
