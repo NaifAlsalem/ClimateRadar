@@ -72,7 +72,7 @@ python3 -c "import hashlib; print(hashlib.sha256('9999'.encode()).hexdigest())"
 
 ## Deployment
 
-**Local:** Open `index.html` in any modern browser. No server required.
+**Local & straight up:** Download & open the `index.html` in any browser to get it launched. No server required.
 
 **First time setup - clone the repository:**
 
@@ -94,7 +94,6 @@ Example:
 **GitHub Pages (private team):**
 ```
 First time — clone the repository
-
 git clone https://github.com/NaifAlsalem/ClimateRadar.git climate-radar
 
 # Open the platform
