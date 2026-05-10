@@ -97,6 +97,15 @@ git clone https://github.com/NaifAlsalem/ClimateRadar
 # Open index.html directly — or serve with:
 python3 -m http.server 8080
 ```
+**Using Git Bash**
+
+
+```
+cd climateRadar
+npx serve .
+```
+
+
 
 **Requirements:** Chrome 90+, Firefox 88+, Edge 90+, Safari 14+
 
