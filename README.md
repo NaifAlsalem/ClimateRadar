@@ -127,6 +127,7 @@ Example:
 
 
 
+
 **Requirements:** Chrome 90+, Firefox 88+, Edge 90+, Safari 14+
 
 ---
