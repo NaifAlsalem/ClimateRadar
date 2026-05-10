@@ -74,6 +74,23 @@ python3 -c "import hashlib; print(hashlib.sha256('9999'.encode()).hexdigest())"
 
 **Local:** Open `index.html` in any modern browser. No server required.
 
+**First time setup - clone the repository:**
+
+Launch PowerShell or Command Prompt from your computer and then write these commands in it:
+
+```
+git clone https://github.com/NaifAlsalem/ClimateRadar.git
+cd ClimateRadar
+start index.html
+```
+Example: 
+<img width="392" height="223" alt="Screenshot 2026-05-10 085932" src="https://github.com/user-attachments/assets/5bac257f-27fc-4f23-8644-2e7c9158315d" />
+
+
+
+
+
+
 **GitHub Pages (private team):**
 ```bash
 git clone https://github.com/NaifAlsalem/ClimateRadar
