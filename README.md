@@ -187,4 +187,4 @@ The platform includes a searchable database of key UNFCCC decisions and IPCC rep
 This repository is **private**. All contents are intended for authorized team use only. Please keep it within the team.
 
 
-![copyright](https://img.shields.io/badge/©_2026_Dr._Naif_Alsalem._All_rights_reserved.-0057B7?style=flat&logoColor=white)
+![copyright](https://img.shields.io/badge/©_2026_Dr._Naif_Alsalem.-0057B7?style=flat&logoColor=white)
