@@ -1,6 +1,6 @@
 # Climate Radar: A Strategic Intelligence Platform
 
-> **Private Repository** · Authorized access only · Dr. Naif Alsalem
+> **Private Repository** · Authorized access only · Please contact: Dr. Naif Alsalem
 
 ---
 
